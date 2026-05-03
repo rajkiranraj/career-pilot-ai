@@ -131,21 +131,7 @@ CareerPilot AI is a comprehensive career development platform that leverages cut
    VITE_SUPABASE_URL=https://your-project-id.supabase.co
    VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
    
-   # === Gemini API Configuration ===
-   # Get API key from: https://makersuite.google.com/app/apikey
-   GEMINI_API_KEY=your-gemini-api-key
    
-   # === Database Configuration ===
-   DATABASE_URL=your-database-connection-string
-   
-   # === Authentication (Optional - if using Clerk) ===
-   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your-clerk-key
-   CLERK_SECRET_KEY=your-clerk-secret
-   NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
-   NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
-   NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=/onboarding
-   NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/onboarding
-   ```
 
 4. **Start development server**
    ```bash
