@@ -1,0 +1,61 @@
+# dependencies
+node_modules/
+backend/vendor/
+
+# build outputs
+build/
+dist/
+dist-ssr/
+out/
+backend/bootstrap/cache/
+backend/public/build/
+backend/public/hot
+backend/public/storage/
+backend/storage/
+frontend/dist/
+frontend/dist-ssr/
+
+# caches and generated files
+coverage/
+.next/
+.pnp
+.pnp.*
+.yarn/
+*.tsbuildinfo
+_ide_helper.php
+Homestead.json
+Homestead.yaml
+.phpunit.result.cache
+.phpunit.cache/
+.phpactor.json
+
+# environment files
+**/.env
+**/.env.local
+**/.env.development.local
+**/.env.production.local
+**/.env.test.local
+
+# editor and OS files
+.DS_Store
+Thumbs.db
+.idea/
+.cursor/
+.nova/
+.phpstorm.meta.php
+.vscode/
+.zed/
+
+# logs and debug output
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# misc app-specific files
+*.pem
+auth.json
+storage/*.key
+storage/pail

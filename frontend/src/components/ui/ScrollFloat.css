@@ -1,0 +1,16 @@
+.scroll-float {
+  /* removed overflow: hidden to prevent font clipping */
+}
+
+.scroll-float-text {
+  display: inline-block;
+  /* Instead of huge font size, let the parent classes decide or use inherit */
+  font-size: inherit;
+  font-weight: inherit;
+  text-align: inherit;
+  line-height: inherit;
+}
+
+.char {
+  display: inline-block;
+}
