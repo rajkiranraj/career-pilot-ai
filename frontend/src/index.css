@@ -245,10 +245,12 @@ html {
 }
 
 @media print {
-  body > *:not(#print-resume) { display: none !important; }
+  body > *:not(#print-resume) {
+    display: none !important;
+  }
   #print-resume {
     display: block !important;
-    font-family: 'Inter', 'Calibri', 'Helvetica Neue', Arial, sans-serif;
+    font-family: "Inter", "Calibri", "Helvetica Neue", Arial, sans-serif;
     font-size: 11pt;
     color: #1a1a1a;
     background: #fff;
@@ -256,10 +258,37 @@ html {
     padding: 0.5in;
     line-height: 1.55;
   }
-  #print-resume h1 { font-size: 18pt; font-weight: 700; margin-bottom: 2pt; text-align: center; }
-  #print-resume h2 { font-size: 11pt; font-weight: 700; border-bottom: 1.5px solid #2c3e50; margin-top: 12pt; text-transform: uppercase; letter-spacing: 1.5px; color: #1a1a2e; }
-  #print-resume h3 { font-size: 11pt; font-weight: 600; margin-bottom: 0; }
-  #print-resume p, #print-resume li { font-size: 10.5pt; margin: 2pt 0; }
-  #print-resume a { color: #0077b5; text-decoration: none; }
-  @page { margin: 0.5in; size: letter; }
+  #print-resume h1 {
+    font-size: 18pt;
+    font-weight: 700;
+    margin-bottom: 2pt;
+    text-align: center;
+  }
+  #print-resume h2 {
+    font-size: 11pt;
+    font-weight: 700;
+    border-bottom: 1.5px solid #2c3e50;
+    margin-top: 12pt;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #1a1a2e;
+  }
+  #print-resume h3 {
+    font-size: 11pt;
+    font-weight: 600;
+    margin-bottom: 0;
+  }
+  #print-resume p,
+  #print-resume li {
+    font-size: 10.5pt;
+    margin: 2pt 0;
+  }
+  #print-resume a {
+    color: #0077b5;
+    text-decoration: none;
+  }
+  @page {
+    margin: 0.5in;
+    size: letter;
+  }
 }

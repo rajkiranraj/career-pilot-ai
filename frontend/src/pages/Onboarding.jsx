@@ -28,6 +28,7 @@ import { onboardingSchema } from "../lib/schema";
 import { updateUser, getOnboardingStatus } from "../services/UserService";
 import { industries } from "../data/industries";
 import { useAuth } from "../context/AuthContext";
+import LoaderScreen from "../components/LoaderScreen";
 
 const Onboarding = () => {
   const { user, loading: authLoading, checkUser } = useAuth();
@@ -84,11 +85,7 @@ const Onboarding = () => {
   }, [authLoading, isEditMode]);
 
   if (authLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        Loading...
-      </div>
-    );
+    return <LoaderScreen label="Loading your profile..." />;
   }
 
   const onSubmit = async (values) => {
@@ -215,7 +212,7 @@ const Onboarding = () => {
               <Label htmlFor="location">Location</Label>
               <Input
                 id="location"
-                placeholder="e.g., San Francisco, CA or Remote"
+                placeholder="e.g., Bengaluru, KA or Remote"
                 {...register("location")}
               />
               {errors.location && (

@@ -1,34 +1,48 @@
-import { supabase } from '../lib/supabase';
+import { supabase } from "../lib/supabase";
 
 export const getResume = async () => {
   const { data, error } = await supabase
-    .from('resumes')
-    .select('*')
-    .order('created_at', { ascending: false })
+    .from("resumes")
+    .select("*")
+    .order("created_at", { ascending: false })
     .limit(1)
-    .single();
-    
-  if (error && error.code !== 'PGRST116') throw error;
+    .maybeSingle();
+
+  if (error) throw error;
   return { success: true, data: data || null };
 };
 
 export const saveResume = async (content) => {
-  const { data: { session } } = await supabase.auth.getSession();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
   const { data, error } = await supabase
-    .from('resumes')
+    .from("resumes")
     .insert({ user_id: session?.user?.id, content })
     .select()
-    .single();
-    
+    .maybeSingle();
+
   if (error) throw error;
   return { success: true, data };
 };
 
 export const improveResumeContent = async (current, type) => {
-  const { data, error } = await supabase.functions.invoke('improve-resume', {
-    body: { resumeContent: current, type }
+  const { data, error } = await supabase.functions.invoke("improve-resume", {
+    body: { resumeContent: current, type },
   });
-  
-  if (error) throw error;
+
+  if (error) {
+    let msg = error.message || "Failed to improve resume";
+    if (error.context && typeof error.context.json === "function") {
+      try {
+        const errBody = await error.context.json();
+        msg = errBody.error || msg;
+      } catch (_) {
+        /* ignore parse failure */
+      }
+    }
+    throw new Error(msg);
+  }
+
   return { success: true, data };
 };

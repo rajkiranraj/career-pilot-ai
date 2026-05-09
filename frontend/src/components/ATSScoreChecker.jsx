@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 import { calculateATSScore, getScoreLabel } from "../utils/atsScorer";
 import { Button } from "./ui/button";
+import { LoadingBreadcrumb } from "./ui/animated-loading-svg-text-shimmer";
 import "../styles/resumePreview.css";
 
 const ICON_MAP = { success: "✅", warning: "⚠️", error: "❌" };
@@ -148,8 +149,7 @@ export default function ATSScoreChecker({ contact, summary, skills, experiences,
                 onClick={onFixWithAI} disabled={fixLoading === true} id="ats-fix-button">
                 {fixLoading === true ? (
                   <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                    <span style={{ display: "inline-block", animation: "spin 1s linear infinite", fontSize: "16px" }}>🔧</span>
-                    Fixing Resume with AI...
+                    <LoadingBreadcrumb text="Cooking" className="text-sm" white />
                   </span>
                 ) : fixLoading === "error" ? (
                   <span style={{ display: "flex", alignItems: "center", gap: "8px", color: "#f87171" }}>🔧 Retry Fix with AI</span>

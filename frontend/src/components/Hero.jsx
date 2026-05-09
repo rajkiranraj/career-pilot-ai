@@ -3,6 +3,7 @@ import { ArrowUpRight, Play } from "lucide-react";
 import { Link } from "react-router-dom";
 import { DiaTextReveal } from "./ui/dia-text-reveal";
 import { InteractiveGrid } from "./ui/interactive-grid";
+import { ShinyButton } from "./ui/shiny-button";
 
 export const Hero = () => {
   return (
@@ -40,9 +41,9 @@ export const Hero = () => {
 
         {/* Subtext */}
         <motion.p
-          initial={{ filter: "blur(10px)", opacity: 0, y: 20 }}
-          animate={{ filter: "blur(0px)", opacity: 1, y: 0 }}
-          transition={{ delay: 0.8, duration: 0.6 }}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.8, duration: 1.2, ease: "easeInOut" }}
           className="text-sm md:text-base text-white/70 font-body font-light leading-relaxed max-w-xl mb-12"
         >
           Expert guidance. AI precision. Built for growth, refined by mentors.
@@ -51,16 +52,18 @@ export const Hero = () => {
 
         {/* CTAs */}
         <motion.div
-          initial={{ filter: "blur(10px)", opacity: 0, y: 20 }}
-          animate={{ filter: "blur(0px)", opacity: 1, y: 0 }}
-          transition={{ delay: 1.1, duration: 0.6 }}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.1, duration: 1.2, ease: "easeInOut" }}
           className="flex flex-col sm:flex-row items-center gap-4 sm:gap-8 w-full sm:w-auto"
         >
           <Link to="/register" className="w-full sm:w-auto">
-            <button className="w-full liquid-glass-strong rounded-full px-10 py-4 text-xs uppercase tracking-[0.2em] font-medium flex items-center justify-center gap-3 hover:scale-105 transition-transform h-14">
-              Start Your Journey
-              <ArrowUpRight className="w-4 h-4" />
-            </button>
+            <ShinyButton className="w-full !px-12 !py-5 !text-sm uppercase tracking-[0.2em] !font-medium hover:scale-105 transition-transform h-16">
+              <span className="flex items-center justify-center gap-3">
+                Start Your Journey
+                <ArrowUpRight className="w-5 h-5" />
+              </span>
+            </ShinyButton>
           </Link>
           <button
             onClick={() => {
@@ -87,7 +90,7 @@ export const Hero = () => {
               (partner) => (
                 <span
                   key={partner}
-                  className="text-xl md:text-3xl font-heading italic text-white/40 hover:text-white transition-colors cursor-default"
+                  className="text-xl md:text-3xl font-heading italic text-white/40 hover:text-white transition-smooth-colors cursor-default"
                 >
                   {partner}
                 </span>

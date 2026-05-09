@@ -14,6 +14,8 @@ export const Navbar = () => {
     { name: "Resume", path: "/resume" },
     { name: "Interview", path: "/interview" },
     { name: "Cover Letter", path: "/ai-cover-letter" },
+    { name: "ATS Analyzer", path: "/ats-analyzer" },
+    { name: "Roadmap", path: "/ai-roadmap" },
     { name: "Pricing", path: "#pricing" },
   ];
 
@@ -40,7 +42,7 @@ export const Navbar = () => {
             );
 
             if (isPricing) {
-              return <div key={link.name}>{content}</div>;
+              return <a href="/#pricing" key={link.name}>{content}</a>;
             }
 
             return (
@@ -104,7 +106,7 @@ export const Navbar = () => {
                 );
 
                 if (isPricing) {
-                  return <div key={link.name}>{content}</div>;
+                  return <a href="/#pricing" key={link.name} onClick={() => setIsOpen(false)}>{content}</a>;
                 }
 
                 return (

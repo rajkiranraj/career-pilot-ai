@@ -5,6 +5,7 @@ import { CareerPilotSparklesHero } from "../components/CareerPilotSparklesHero";
 import { StartSection } from "../components/StartSection";
 import { FeaturesChess, FeaturesGrid } from "../components/Features";
 import { Stats, Testimonials, CtaFooter } from "../components/FooterSections";
+import { PricingSection } from "../components/PricingSection";
 import { ScrollShowcase } from "../components/ui/ScrollShowcase";
 import ReactLenis from "lenis/react";
 
@@ -26,6 +27,7 @@ export default function LandingPage() {
             <ScrollShowcase />
             <Stats />
             <Testimonials />
+            <PricingSection />
             <CtaFooter />
           </div>
         </main>
@@ -33,8 +35,8 @@ export default function LandingPage() {
 
       {/* Global Background Glows */}
       <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-900/10 blur-[120px] rounded-full" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-900/10 blur-[120px] rounded-full" />
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-red-900/10 blur-[120px] rounded-full" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-red-800/10 blur-[120px] rounded-full" />
       </div>
       </div>
     </ReactLenis>

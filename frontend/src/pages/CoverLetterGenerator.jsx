@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { Loader2, Eye, Trash2, Plus } from "lucide-react";
+import { Trash2, Plus, Copy, Check } from "lucide-react";
 import { Button } from "../components/ui/button";
 import {
   Card,
@@ -34,8 +34,9 @@ import {
 import { coverLetterSchema } from "../lib/schema";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import MDEditor from "@uiw/react-md-editor";
 import { format } from "date-fns";
+import LoaderScreen from "../components/LoaderScreen";
+import { LoadingBreadcrumb } from "../components/ui/animated-loading-svg-text-shimmer";
 
 export default function CoverLetterGenerator() {
   const { user, loading: authLoading } = useAuth();
@@ -52,6 +53,7 @@ export default function CoverLetterGenerator() {
   const [selectedLetter, setSelectedLetter] = useState(null);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const {
     register,
@@ -105,9 +107,17 @@ export default function CoverLetterGenerator() {
     try {
       const response = await generateCoverLetter(data);
       if (response.success) {
-        toast.success("Cover letter generated successfully!");
-        setCoverLetters([response.data, ...coverLetters]);
-        navigate(`/ai-cover-letter/${response.data.id}`);
+        const letter = response.data;
+        if (letter._dbSaveFailed) {
+          toast.warning("Cover letter generated but could not be saved to library.");
+        } else {
+          toast.success("Cover letter generated successfully!");
+        }
+        setCoverLetters([letter, ...coverLetters]);
+        setSelectedLetter(letter);
+        if (!letter._dbSaveFailed) {
+          navigate(`/ai-cover-letter/${letter.id}`);
+        }
         reset();
       }
     } catch (error) {
@@ -131,9 +141,7 @@ export default function CoverLetterGenerator() {
   };
 
   if (loading) {
-    return (
-      <div className="container mx-auto py-12 text-center">Loading...</div>
-    );
+    return <LoaderScreen label="Loading cover letters..." />;
   }
 
   return (
@@ -166,7 +174,7 @@ export default function CoverLetterGenerator() {
             Your Cover Letters
           </h3>
           {coverLetters.length === 0 ? (
-            <Card className="border-white/5 bg-white/[0.02]">
+            <Card className="border-white/5 bg-white/2">
               <CardContent className="py-12 text-center text-white/30 font-body font-light italic">
                 No cover letters yet.
               </CardContent>
@@ -176,7 +184,7 @@ export default function CoverLetterGenerator() {
               {coverLetters.map((letter) => (
                 <Card
                   key={letter.id}
-                  className={`cursor-pointer transition-all border-white/5 hover:bg-white/[0.02] group ${id === String(letter.id) ? "border-white/20 bg-white/[0.03]" : ""}`}
+                  className={`cursor-pointer transition-all border-white/5 hover:bg-white/2 group ${id === String(letter.id) ? "border-white/20 bg-white/3" : ""}`}
                   onClick={() => navigate(`/ai-cover-letter/${letter.id}`)}
                 >
                   <CardHeader className="p-6">
@@ -240,7 +248,7 @@ export default function CoverLetterGenerator() {
         {/* Main Content: Form or Preview */}
         <div className="lg:col-span-2">
           {id === "new" ? (
-            <Card className="border-white/5 bg-white/[0.02] p-2">
+            <Card className="border-white/5 bg-white/2 p-2">
               <CardHeader className="p-8">
                 <CardTitle className="text-2xl font-heading italic text-white">
                   Job Details
@@ -261,7 +269,7 @@ export default function CoverLetterGenerator() {
                       </Label>
                       <Input
                         id="companyName"
-                        placeholder="e.g. Apple"
+                        placeholder="e.g. Flipkart"
                         {...register("companyName")}
                       />
                       {errors.companyName && (
@@ -280,7 +288,7 @@ export default function CoverLetterGenerator() {
                       </Label>
                       <Input
                         id="jobTitle"
-                        placeholder="e.g. Senior Product Designer"
+                        placeholder="e.g. SDE II"
                         {...register("jobTitle")}
                       />
                       {errors.jobTitle && (
@@ -301,7 +309,7 @@ export default function CoverLetterGenerator() {
                     <Textarea
                       id="jobDescription"
                       placeholder="Paste the job description from the listing..."
-                      className="min-h-[200px]"
+                      className="min-h-50"
                       {...register("jobDescription")}
                     />
                     {errors.jobDescription && (
@@ -326,10 +334,7 @@ export default function CoverLetterGenerator() {
                       className="rounded-full px-8"
                     >
                       {generating ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Generating...
-                        </>
+                        <LoadingBreadcrumb text="Cooking" className="text-xs" white />
                       ) : (
                         "Generate Cover Letter"
                       )}
@@ -339,8 +344,25 @@ export default function CoverLetterGenerator() {
               </CardContent>
             </Card>
           ) : selectedLetter ? (
-            <div className="space-y-8">
+            <div className="space-y-6">
               <div className="flex justify-end gap-2">
+                <Button
+                  variant="glass"
+                  onClick={() => {
+                    navigator.clipboard.writeText(selectedLetter.content);
+                    setCopied(true);
+                    setTimeout(() => setCopied(false), 2000);
+                    toast.success("Copied to clipboard!");
+                  }}
+                  className="rounded-full"
+                >
+                  {copied ? (
+                    <Check className="h-4 w-4 mr-2" />
+                  ) : (
+                    <Copy className="h-4 w-4 mr-2" />
+                  )}
+                  {copied ? "Copied" : "Copy Text"}
+                </Button>
                 <Button
                   variant="glass"
                   onClick={() => navigate("/ai-cover-letter/new")}
@@ -350,21 +372,42 @@ export default function CoverLetterGenerator() {
                   Generate Another
                 </Button>
               </div>
-              <div className="liquid-glass rounded-2xl border border-white/10 p-2 min-h-[600px]">
-                <div className="bg-white text-black p-12 rounded-xl shadow-2xl">
-                  <MDEditor.Markdown
-                    source={selectedLetter.content}
+
+              {selectedLetter._dbSaveFailed && (
+                <div className="rounded-xl border border-yellow-500/30 bg-yellow-500/10 px-4 py-3 text-sm text-yellow-200">
+                  This cover letter was generated but could not be saved to your
+                  library. Copy the text below to keep it.
+                </div>
+              )}
+
+              <div className="liquid-glass rounded-2xl border border-white/10 p-2">
+                <div className="bg-white text-black rounded-xl shadow-2xl overflow-hidden">
+                  {/* Document header */}
+                  <div className="border-b border-gray-200 px-8 py-6 sm:px-12">
+                    <h2 className="text-xl font-semibold text-gray-900 tracking-tight">
+                      {selectedLetter.job_title || "Cover Letter"}
+                    </h2>
+                    <p className="text-sm text-gray-500 mt-1">
+                      {selectedLetter.company_name || ""}
+                    </p>
+                  </div>
+                  {/* Letter body */}
+                  <div
+                    className="px-8 py-8 sm:px-12 sm:py-10 leading-relaxed whitespace-pre-wrap font-serif text-gray-900"
                     style={{
-                      backgroundColor: "white",
-                      color: "black",
-                      fontFamily: "Barlow, sans-serif",
+                      fontFamily: "'Georgia', 'Times New Roman', serif",
+                      fontSize: "15px",
+                      lineHeight: "1.75",
+                      minHeight: "500px",
                     }}
-                  />
+                  >
+                    {selectedLetter.content}
+                  </div>
                 </div>
               </div>
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center py-32 space-y-8 liquid-glass rounded-3xl border border-white/5 bg-white/[0.01]">
+            <div className="flex flex-col items-center justify-center py-32 space-y-8 liquid-glass rounded-3xl border border-white/5 bg-white/1">
               <div className="liquid-glass-strong p-8 rounded-full">
                 <Plus className="h-12 w-12 text-white/20" />
               </div>

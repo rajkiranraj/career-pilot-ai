@@ -5,19 +5,19 @@ import { SignUpPage } from "./ui/sign-up";
 const sampleTestimonials = [
   {
     avatarSrc: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop",
-    name: "Sarah Chen",
+    name: "Priya Patel",
     handle: "Software Engineer",
     text: "The AI career coach completely transformed my job search. I landed a lead role at a top tech company!"
   },
   {
     avatarSrc: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop",
-    name: "Marcus Johnson",
+    name: "Rahul Verma",
     handle: "Product Manager",
     text: "The interview prep is incredibly realistic. I felt so much more confident during the actual hiring process."
   },
   {
     avatarSrc: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&h=400&fit=crop",
-    name: "David Martinez",
+    name: "Sneha Nair",
     handle: "Data Scientist",
     text: "Intuitive, powerful, and truly life-changing for my professional growth. Best investment I've made."
   },

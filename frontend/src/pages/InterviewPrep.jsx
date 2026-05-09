@@ -22,6 +22,7 @@ import QuizList from "../components/QuizList";
 import QuizResult from "../components/QuizResult";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import LoaderScreen from "../components/LoaderScreen";
 
 export default function InterviewPrep() {
   const { user, loading: authLoading } = useAuth();
@@ -126,19 +127,11 @@ export default function InterviewPrep() {
   };
 
   if (initialLoading && !isQuizMode) {
-    return (
-      <div className="container mx-auto py-12 text-center">
-        Loading assessments...
-      </div>
-    );
+    return <LoaderScreen label="Loading assessments..." />;
   }
 
   if (loading) {
-    return (
-      <div className="container mx-auto py-12 text-center">
-        Generating your personalized quiz...
-      </div>
-    );
+    return <LoaderScreen label="Generating your personalized quiz..." />;
   }
 
   // Quiz Mode

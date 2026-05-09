@@ -76,20 +76,23 @@ export const Testimonials = () => {
     {
       quote:
         "The AI resume builder is a game-changer. I got 3 interviews in a week after struggling for months.",
-      name: "Sarah Chen",
+      name: "Priya Patel",
       role: "Software Engineer",
+      image: "/testimonials/priya.png",
     },
     {
       quote:
         "Mock interviews with CareerPilot felt so real. The feedback was brutal but exactly what I needed to land my dream role.",
-      name: "Marcus Webb",
+      name: "Rahul Verma",
       role: "Product Manager",
+      image: "/testimonials/rahul.png",
     },
     {
       quote:
         "CareerPilot didn't just help me find a job. They helped me define my career path. The premium feel is just the cherry on top.",
-      name: "Elena Voss",
+      name: "Ananya Iyer",
       role: "Design Lead",
+      image: "/testimonials/ananya.png",
     },
   ];
 
@@ -118,13 +121,20 @@ export const Testimonials = () => {
             <p className="relative z-20 text-white/80 font-body font-light text-base md:text-lg italic leading-relaxed group-hover:text-white transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]">
               "{review.quote}"
             </p>
-            <div className="relative z-20 flex flex-col gap-2 mt-auto">
-              <span className="text-white font-body font-medium text-sm transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]">
-                {review.name}
-              </span>
-              <span className="text-white/40 font-body font-light text-[10px] uppercase tracking-[0.2em] group-hover:text-white/70 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]">
-                {review.role}
-              </span>
+            <div className="relative z-20 flex items-center gap-4 mt-auto">
+              <img
+                src={review.image}
+                alt={review.name}
+                className="w-12 h-12 rounded-full object-cover border border-white/20 shadow-xl"
+              />
+              <div className="flex flex-col gap-1">
+                <span className="text-white font-body font-medium text-sm transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]">
+                  {review.name}
+                </span>
+                <span className="text-white/40 font-body font-light text-[10px] uppercase tracking-[0.2em] group-hover:text-white/70 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]">
+                  {review.role}
+                </span>
+              </div>
             </div>
           </CardSpotlight>
         ))}

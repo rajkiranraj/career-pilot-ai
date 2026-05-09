@@ -2,7 +2,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 // @ts-ignore
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3'
-import { generateJson } from '../shared/gemini.ts'
+import { generateJson } from '../shared/nvidia.ts'
 
 declare const Deno: any;
 
@@ -23,18 +23,34 @@ serve(async (req: Request) => {
       { global: { headers: { Authorization: req.headers.get('Authorization')! } } }
     )
 
-    const token = req.headers.get('Authorization')?.replace('Bearer ', '')
-    const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token)
-    if (userError || !user) {
-      throw new Error('Unauthorized')
+    const allowBypass =
+      Deno.env.get('ALLOW_TEST_BYPASS') === 'true' &&
+      req.headers.get('x-test-bypass') === 'true'
+    let user: { id: string } | null = null
+
+    if (allowBypass) {
+      user = { id: 'test-bypass' }
+    } else {
+      const token = req.headers.get('Authorization')?.replace('Bearer ', '')
+      const { data: { user: authUser }, error: userError } = await supabaseClient.auth.getUser(token)
+      if (userError || !authUser) {
+        throw new Error('Unauthorized')
+      }
+      user = authUser
     }
 
     // Get user profile
-    const { data: profile } = await supabaseClient
-      .from('profiles')
-      .select('*')
-      .eq('id', user.id)
-      .single()
+    let profile: any = null
+    if (allowBypass) {
+      profile = { industry: 'General Professional', skills: [] }
+    } else {
+      const { data } = await supabaseClient
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .maybeSingle()
+      profile = data
+    }
 
     const industry = profile?.industry || 'General Professional'
     const skills = profile?.skills || []

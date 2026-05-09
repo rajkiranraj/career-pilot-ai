@@ -2,28 +2,28 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { SignInPage } from "../components/ui/sign-in";
 import { useAuth } from "../context/AuthContext";
-import { supabase } from "../lib/supabase";
+import { getAuthRedirectUrl, supabase } from "../lib/supabase";
 import { toast } from "sonner";
 
 const sampleTestimonials = [
   {
     avatarSrc:
       "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop",
-    name: "Sarah Chen",
+    name: "Priya Patel",
     handle: "Software Engineer",
     text: "The AI career coach completely transformed my job search. I landed a lead role at a top tech company!",
   },
   {
     avatarSrc:
       "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop",
-    name: "Marcus Johnson",
+    name: "Rahul Verma",
     handle: "Product Manager",
     text: "The interview prep is incredibly realistic. I felt so much more confident during the actual hiring process.",
   },
   {
     avatarSrc:
       "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&h=400&fit=crop",
-    name: "David Martinez",
+    name: "Sneha Nair",
     handle: "Data Scientist",
     text: "Intuitive, powerful, and truly life-changing for my professional growth. Best investment I've made.",
   },
@@ -37,9 +37,13 @@ const Login = () => {
     // Basic implementation; you might want to show a modal to capture email first
     const email = prompt("Enter your email address to reset password:");
     if (!email) return;
-    
+
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email);
+      const redirectTo = getAuthRedirectUrl();
+      const { error } = await supabase.auth.resetPasswordForEmail(
+        email,
+        redirectTo ? { redirectTo } : undefined,
+      );
       if (error) throw error;
       toast.success("Password reset email sent!");
     } catch (error) {
@@ -59,7 +63,14 @@ const Login = () => {
         password,
       });
 
-      if (error) throw error;
+      if (error) {
+        if (error.message?.toLowerCase().includes("email not confirmed")) {
+          toast.error("Please verify your email before signing in.");
+          return;
+        }
+
+        throw error;
+      }
 
       await checkUser(); // Update auth state
       toast.success("Welcome back!");

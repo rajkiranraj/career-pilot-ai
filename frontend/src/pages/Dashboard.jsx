@@ -5,6 +5,7 @@ import { getOnboardingStatus } from "../services/UserService";
 import DashboardView from "../components/DashboardView";
 import { useAuth } from "../context/AuthContext";
 import { Button } from "../components/ui/button";
+import LoaderScreen from "../components/LoaderScreen";
 
 const Dashboard = () => {
   const { user, loading: authLoading } = useAuth();
@@ -62,13 +63,17 @@ const Dashboard = () => {
         }
 
         if (error?.status === 403) {
-          if (!cancelled) setError(
-            "Your account must be verified before accessing the dashboard.",
-          );
+          if (!cancelled)
+            setError(
+              "Your account must be verified before accessing the dashboard.",
+            );
           return;
         }
 
-        if (!cancelled) setError(error?.message || "Unable to load dashboard data right now.");
+        if (!cancelled)
+          setError(
+            error?.message || "Unable to load dashboard data right now.",
+          );
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -83,11 +88,7 @@ const Dashboard = () => {
   }, [authLoading]);
 
   if (authLoading || (loading && user)) {
-    return (
-      <div className="container mx-auto py-12 text-center">
-        Loading insights...
-      </div>
-    );
+    return <LoaderScreen label="Loading insights..." />;
   }
 
   if (error) {

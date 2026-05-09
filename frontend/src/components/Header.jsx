@@ -106,6 +106,34 @@ export default function Header() {
                         </div>
                       </Link>
                     </DropdownMenuItem>
+                    <DropdownMenuItem
+                      asChild
+                      className="rounded-xl focus:bg-white/10 focus:text-white cursor-pointer p-3"
+                    >
+                      <Link to="/ats-analyzer" className="flex items-center gap-3">
+                        <FileText className="h-4 w-4" />
+                        <div className="flex flex-col">
+                          <span className="font-medium">ATS Analyzer</span>
+                          <span className="text-[10px] text-white/40">
+                            Check resume match
+                          </span>
+                        </div>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      asChild
+                      className="rounded-xl focus:bg-white/10 focus:text-white cursor-pointer p-3"
+                    >
+                      <Link to="/ai-roadmap" className="flex items-center gap-3">
+                        <GraduationCap className="h-4 w-4" />
+                        <div className="flex flex-col">
+                          <span className="font-medium">AI Roadmap</span>
+                          <span className="text-[10px] text-white/40">
+                            Career learning path
+                          </span>
+                        </div>
+                      </Link>
+                    </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>

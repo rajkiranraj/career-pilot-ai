@@ -1,11 +1,11 @@
 {
   "$schema": "https://ui.shadcn.com/schema.json",
   "style": "new-york",
-  "rsc": true,
-  "tsx": false,
+  "rsc": false,
+  "tsx": true,
   "tailwind": {
-    "config": "tailwind.config.mjs",
-    "css": "app/globals.css",
+    "config": "tailwind.config.js",
+    "css": "src/index.css",
     "baseColor": "neutral",
     "cssVariables": true,
     "prefix": ""
@@ -19,6 +19,7 @@
     "hooks": "@/hooks"
   },
   "registries": {
-    "@aceternity": "https://ui.aceternity.com/registry/{name}.json"
+    "@aceternity": "https://ui.aceternity.com/registry/{name}.json",
+    "@forgeui": "https://forgeui.in/r/{name}.json"
   }
 }

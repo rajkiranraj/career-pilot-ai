@@ -4,9 +4,10 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
-import { Sparkles, X, Loader2 } from "lucide-react";
+import { Sparkles, X } from "lucide-react";
 import { improveResumeContent } from "../services/ResumeService";
 import { toast } from "sonner";
+import { LoadingBreadcrumb } from "./ui/animated-loading-svg-text-shimmer";
 
 const formatDisplayDate = (dateString) => {
   if (!dateString) return "";
@@ -21,7 +22,7 @@ const formatDisplayDate = (dateString) => {
 export function EntryForm({ type, entries = [], onChange }) {
   const [isAdding, setIsAdding] = useState(false);
   const [isImproving, setIsImproving] = useState(false);
-  
+
   const [formData, setFormData] = useState({
     title: "",
     organization: "",
@@ -37,12 +38,27 @@ export function EntryForm({ type, entries = [], onChange }) {
 
   const getLabels = () => {
     if (type === "Education") {
-      return { title: "Degree/Certificate", org: "School/University", titlePlaceholder: "e.g. B.S. Computer Science", orgPlaceholder: "e.g. Stanford University" };
+      return {
+        title: "Degree/Certificate",
+        org: "School/University",
+        titlePlaceholder: "e.g. B.S. Computer Science",
+        orgPlaceholder: "e.g. IIT Bombay",
+      };
     }
     if (type === "Project") {
-      return { title: "Project Name", org: "Role/Tech Stack", titlePlaceholder: "e.g. Portfolio Website", orgPlaceholder: "e.g. Full Stack Developer (React, Node.js)" };
+      return {
+        title: "Project Name",
+        org: "Role/Tech Stack",
+        titlePlaceholder: "e.g. Portfolio Website",
+        orgPlaceholder: "e.g. Full Stack Developer (React, Node.js)",
+      };
     }
-    return { title: "Job Title", org: "Company", titlePlaceholder: "e.g. Senior Software Engineer", orgPlaceholder: "e.g. Google" };
+    return {
+      title: "Job Title",
+      org: "Company",
+      titlePlaceholder: "e.g. Senior Software Engineer",
+      orgPlaceholder: "e.g. TCS",
+    };
   };
 
   const labels = getLabels();
@@ -62,12 +78,15 @@ export function EntryForm({ type, entries = [], onChange }) {
   const validateForm = () => {
     const newErrors = {};
     if (!formData.title) newErrors.title = `${labels.title} is required`;
-    if (!formData.organization) newErrors.organization = `${labels.org} is required`;
+    if (!formData.organization)
+      newErrors.organization = `${labels.org} is required`;
     if (!formData.startDate) newErrors.startDate = "Start date is required";
     if (!formData.current && !formData.endDate) {
-      newErrors.endDate = "End date is required unless this is your current position";
+      newErrors.endDate =
+        "End date is required unless this is your current position";
     }
-    if (!formData.description) newErrors.description = "Description is required";
+    if (!formData.description)
+      newErrors.description = "Description is required";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -133,7 +152,7 @@ export function EntryForm({ type, entries = [], onChange }) {
         {entries.map((item, index) => (
           <Card
             key={index}
-            className="hover:bg-white/[0.02] transition-colors border-white/5"
+            className="hover:bg-white/2 transition-colors border-white/5"
           >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
               <CardTitle className="text-lg font-heading italic text-white">
@@ -162,7 +181,12 @@ export function EntryForm({ type, entries = [], onChange }) {
                   </p>
                 )}
                 {item.link && (
-                  <a href={item.link} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-400 hover:text-blue-300 font-body text-left w-fit">
+                  <a
+                    href={item.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-blue-400 hover:text-blue-300 font-body text-left w-fit"
+                  >
                     🔗 {item.link}
                   </a>
                 )}
@@ -176,7 +200,7 @@ export function EntryForm({ type, entries = [], onChange }) {
       </div>
 
       {isAdding ? (
-        <Card className="border-white/10 bg-white/[0.02]">
+        <Card className="border-white/10 bg-white/2">
           <CardHeader>
             <CardTitle className="text-xl">Add {type}</CardTitle>
           </CardHeader>
@@ -224,7 +248,7 @@ export function EntryForm({ type, entries = [], onChange }) {
                   </Label>
                   <Input
                     name="location"
-                    placeholder="e.g. San Francisco, CA (or Remote)"
+                    placeholder="e.g. Bengaluru, KA (or Remote)"
                     value={formData.location}
                     onChange={handleInputChange}
                   />
@@ -237,7 +261,7 @@ export function EntryForm({ type, entries = [], onChange }) {
                   </Label>
                   <Input
                     name="link"
-                    placeholder="e.g. https://github.com/yourusername/project"
+                    placeholder="e.g. https://github.com/arjunsharma/project"
                     value={formData.link}
                     onChange={handleInputChange}
                   />
@@ -250,11 +274,11 @@ export function EntryForm({ type, entries = [], onChange }) {
                 <Label className="text-white/50 uppercase tracking-widest text-[10px] ml-4">
                   Start Date
                 </Label>
-                <Input 
-                  type="month" 
+                <Input
+                  type="month"
                   name="startDate"
                   value={formData.startDate}
-                  onChange={handleInputChange} 
+                  onChange={handleInputChange}
                 />
                 {errors.startDate && (
                   <p className="text-sm text-red-500 text-left ml-4">
@@ -312,7 +336,7 @@ export function EntryForm({ type, entries = [], onChange }) {
                   className="rounded-full"
                 >
                   {isImproving ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <LoadingBreadcrumb text="Cooking" className="text-xs" white />
                   ) : (
                     <>
                       <Sparkles className="h-4 w-4 mr-2" />
@@ -326,7 +350,11 @@ export function EntryForm({ type, entries = [], onChange }) {
                 value={formData.description}
                 onChange={handleInputChange}
                 className="h-40"
-                placeholder={type === "Education" ? "Describe coursework, achievements, GPA..." : "Describe your key responsibilities and achievements..."}
+                placeholder={
+                  type === "Education"
+                    ? "Describe coursework, achievements, GPA..."
+                    : "Describe your key responsibilities and achievements..."
+                }
               />
               {errors.description && (
                 <p className="text-sm text-red-500 text-left ml-4">
