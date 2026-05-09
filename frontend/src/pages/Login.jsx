@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SignInPage } from "../components/ui/sign-in";
 import { useAuth } from "../context/AuthContext";
@@ -31,7 +31,16 @@ const sampleTestimonials = [
 
 const Login = () => {
   const navigate = useNavigate();
-  const { checkUser } = useAuth();
+  const { user, checkUser } = useAuth();
+  const [loginSuccess, setLoginSuccess] = useState(false);
+
+  // Navigate to dashboard once user is set after login
+  useEffect(() => {
+    if (loginSuccess && user) {
+      navigate("/dashboard");
+      setLoginSuccess(false);
+    }
+  }, [user, loginSuccess, navigate]);
 
   const handleResetPassword = async () => {
     // Basic implementation; you might want to show a modal to capture email first
@@ -74,7 +83,7 @@ const Login = () => {
 
       await checkUser(); // Update auth state
       toast.success("Welcome back!");
-      navigate("/dashboard");
+      setLoginSuccess(true); // Trigger navigation via useEffect when user is set
     } catch (error) {
       console.error("Login failed:", error);
       toast.error(

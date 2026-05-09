@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SignUpPage } from "../components/ui/sign-up";
 import { useAuth } from "../context/AuthContext";
@@ -31,7 +31,16 @@ const sampleTestimonials = [
 
 const Register = () => {
   const navigate = useNavigate();
-  const { checkUser } = useAuth();
+  const { user, checkUser } = useAuth();
+  const [signupSuccess, setSignupSuccess] = useState(false);
+
+  // Navigate to onboarding once user is set after signup
+  useEffect(() => {
+    if (signupSuccess && user) {
+      navigate("/onboarding");
+      setSignupSuccess(false);
+    }
+  }, [user, signupSuccess, navigate]);
 
   const handleSignUp = async (event) => {
     event.preventDefault();
@@ -58,7 +67,7 @@ const Register = () => {
       if (data?.session) {
         await checkUser(); // Update auth state
         toast.success("Welcome aboard! You're all set.");
-        navigate("/onboarding");
+        setSignupSuccess(true); // Trigger navigation via useEffect when user is set
         return;
       }
 
