@@ -24,6 +24,7 @@ import { Toaster } from "./components/ui/sonner";
 import LoaderScreen from "./components/LoaderScreen";
 
 import MockInterview from "./pages/MockInterview";
+import NotFound from "./pages/NotFound";
 
 const AppRoutes = () => {
   const { loading } = useAuth();
@@ -50,6 +51,7 @@ const AppRoutes = () => {
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/payment/success" element={<PaymentSuccess />} />
         <Route element={<ProtectedRoute />}>
           <Route element={<Layout />}>
             <Route path="/dashboard" element={<Dashboard />} />
@@ -65,10 +67,9 @@ const AppRoutes = () => {
             <Route path="/settings" element={<ProfileSettings />} />
             <Route path="/ats-analyzer" element={<ATSAnalyzer />} />
             <Route path="/ai-roadmap" element={<AIRoadmap />} />
-            <Route path="/payment/success" element={<PaymentSuccess />} />
           </Route>
         </Route>
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </>
   );
