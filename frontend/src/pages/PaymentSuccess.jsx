@@ -47,9 +47,9 @@ export const PaymentSuccess = () => {
         setStatus("success");
         toast.success("Payment successful! Your account has been upgraded.");
         
-        // Redirect to dashboard after 3 seconds
+        // Redirect to home page after 3 seconds
         setTimeout(() => {
-          navigate("/dashboard");
+          navigate("/");
         }, 3000);
       } catch (error) {
         setStatus("error");
@@ -80,10 +80,10 @@ export const PaymentSuccess = () => {
             </div>
             <div className="space-y-2">
               <h2 className="text-2xl font-heading italic text-white">Payment Successful!</h2>
-              <p className="text-white/60">Your account has been upgraded. Redirecting you to the dashboard...</p>
+              <p className="text-white/60">Your account has been upgraded. Redirecting you home...</p>
             </div>
-            <Button variant="glass" onClick={() => navigate("/dashboard")} className="mt-4 w-full">
-              Go to Dashboard Now
+            <Button variant="glass" onClick={() => navigate("/")} className="mt-4 w-full">
+              Go to Home
             </Button>
           </>
         )}
