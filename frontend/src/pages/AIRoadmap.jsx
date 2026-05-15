@@ -4,12 +4,24 @@ import { Button } from "../components/ui/button";
 import { LoadingBreadcrumb } from "../components/ui/animated-loading-svg-text-shimmer";
 import "../styles/roadmap.css";
 
-const TIMELINE_OPTIONS = [
-  { value: 3, label: "3 Months — Sprint" },
-  { value: 6, label: "6 Months — Standard" },
-  { value: 9, label: "9 Months — Thorough" },
-  { value: 12, label: "12 Months — Deep Dive" },
+const TIMELINE_PRESETS = [
+  { value: 3, name: "Sprint" },
+  { value: 6, name: "Standard" },
+  { value: 9, name: "Thorough" },
+  { value: 12, name: "Deep Dive" },
 ];
+
+const ROLE_TIMELINE_OPTIONS = TIMELINE_PRESETS.map((preset) => ({
+  value: preset.value,
+  label: `${preset.value} Months — ${preset.name}`,
+}));
+
+const HOURS_PER_MONTH = 40;
+
+const JD_TIMELINE_OPTIONS = TIMELINE_PRESETS.map((preset) => ({
+  value: preset.value,
+  label: `${preset.value * HOURS_PER_MONTH} Hours — ${preset.name}`,
+}));
 
 const RESOURCE_ICONS = {
   course: "",
@@ -20,16 +32,37 @@ const RESOURCE_ICONS = {
 };
 
 const AIRoadmap = () => {
+  const [mode, setMode] = useState("role");
   const [currentRole, setCurrentRole] = useState("");
   const [currentSkills, setCurrentSkills] = useState("");
   const [targetRole, setTargetRole] = useState("");
   const [timelineMonths, setTimelineMonths] = useState(6);
+  const [jobDescription, setJobDescription] = useState("");
+  const [jdTargetRole, setJdTargetRole] = useState("");
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  const isJDMode = mode === "jd";
+  const loadingLabel = isJDMode ? "Generating Reviser + Roadmap" : "Generating Roadmap";
+  const buttonLabel = isJDMode ? "Generate Reviser + Roadmap" : "Generate My Roadmap";
+  const timelineOptions = isJDMode ? JD_TIMELINE_OPTIONS : ROLE_TIMELINE_OPTIONS;
+  const timelineLabel = isJDMode ? "Timeline (hours)" : "Timeline";
+
+  const handleModeChange = useCallback((nextMode) => {
+    setMode(nextMode);
+    setError("");
+    setResult(null);
+    setLoading(false);
+  }, []);
+
   const handleGenerate = useCallback(async () => {
-    if (!currentRole.trim() || !targetRole.trim()) {
+    if (isJDMode) {
+      if (!jobDescription.trim()) {
+        setError("Please paste a job description.");
+        return;
+      }
+    } else if (!currentRole.trim() || !targetRole.trim()) {
       setError("Please fill in your current role and target role.");
       return;
     }
@@ -39,19 +72,35 @@ const AIRoadmap = () => {
     setResult(null);
 
     try {
-      const data = await generateRoadmap({
-        currentRole,
-        currentSkills,
-        targetRole,
-        timelineMonths,
-      });
+      const payload = isJDMode
+        ? {
+            jobDescription: jobDescription.trim(),
+            targetRole: jdTargetRole.trim() || undefined,
+            timelineMonths,
+          }
+        : {
+            currentRole,
+            currentSkills,
+            targetRole,
+            timelineMonths,
+          };
+
+      const data = await generateRoadmap(payload);
       setResult(data);
     } catch (err) {
       setError(err.message || "Roadmap generation failed. Please try again.");
     } finally {
       setLoading(false);
     }
-  }, [currentRole, currentSkills, targetRole, timelineMonths]);
+  }, [
+    isJDMode,
+    jobDescription,
+    jdTargetRole,
+    currentRole,
+    currentSkills,
+    targetRole,
+    timelineMonths,
+  ]);
 
   return (
     <div className="roadmap-page">
@@ -62,52 +111,109 @@ const AIRoadmap = () => {
 
       {/* Input Form */}
       <div className="roadmap-form liquid-glass animate-element animate-delay-200">
+        <div className="roadmap-mode-toggle">
+          <Button
+            type="button"
+            size="sm"
+            variant={!isJDMode ? "glass" : "outline"}
+            onClick={() => handleModeChange("role")}
+            aria-pressed={!isJDMode}
+          >
+            Role Inputs
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            variant={isJDMode ? "glass" : "outline"}
+            onClick={() => handleModeChange("jd")}
+            aria-pressed={isJDMode}
+          >
+            JD Inputs
+          </Button>
+        </div>
         <div className="roadmap-form-grid">
-          <div className="roadmap-field">
-            <label className="roadmap-label">
-              Current Role
-            </label>
-            <input
-              className="roadmap-input"
-              type="text"
-              placeholder="e.g., Frontend Developer"
-              value={currentRole}
-              onChange={(e) => setCurrentRole(e.target.value)}
-              id="roadmap-current-role"
-            />
-          </div>
+          {isJDMode ? (
+            <>
+              <div className="roadmap-field full-width">
+                <label className="roadmap-label">
+                  Job Description
+                </label>
+                <textarea
+                  className="roadmap-textarea"
+                  placeholder="Paste the job description you want to target..."
+                  value={jobDescription}
+                  onChange={(e) => setJobDescription(e.target.value)}
+                  id="roadmap-jd-input"
+                />
+                <div className="roadmap-char-count">
+                  {jobDescription.length.toLocaleString()} characters
+                </div>
+              </div>
+
+              <div className="roadmap-field">
+                <label className="roadmap-label">
+                  Target Role (optional)
+                </label>
+                <input
+                  className="roadmap-input"
+                  type="text"
+                  placeholder="e.g., Full-Stack Engineer"
+                  value={jdTargetRole}
+                  onChange={(e) => setJdTargetRole(e.target.value)}
+                  id="roadmap-target-role"
+                />
+                <span className="roadmap-hint">We will infer from the JD if blank.</span>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="roadmap-field">
+                <label className="roadmap-label">
+                  Current Role
+                </label>
+                <input
+                  className="roadmap-input"
+                  type="text"
+                  placeholder="e.g., Frontend Developer"
+                  value={currentRole}
+                  onChange={(e) => setCurrentRole(e.target.value)}
+                  id="roadmap-current-role"
+                />
+              </div>
+
+              <div className="roadmap-field">
+                <label className="roadmap-label">
+                  Target Role
+                </label>
+                <input
+                  className="roadmap-input"
+                  type="text"
+                  placeholder="e.g., Full-Stack Engineer"
+                  value={targetRole}
+                  onChange={(e) => setTargetRole(e.target.value)}
+                  id="roadmap-target-role"
+                />
+              </div>
+
+              <div className="roadmap-field full-width">
+                <label className="roadmap-label">
+                  Current Skills (comma-separated)
+                </label>
+                <input
+                  className="roadmap-input"
+                  type="text"
+                  placeholder="e.g., React, JavaScript, HTML, CSS, Git"
+                  value={currentSkills}
+                  onChange={(e) => setCurrentSkills(e.target.value)}
+                  id="roadmap-skills"
+                />
+              </div>
+            </>
+          )}
 
           <div className="roadmap-field">
             <label className="roadmap-label">
-              Target Role
-            </label>
-            <input
-              className="roadmap-input"
-              type="text"
-              placeholder="e.g., Full-Stack Engineer"
-              value={targetRole}
-              onChange={(e) => setTargetRole(e.target.value)}
-              id="roadmap-target-role"
-            />
-          </div>
-
-          <div className="roadmap-field full-width">
-            <label className="roadmap-label">
-              Current Skills (comma-separated)
-            </label>
-            <input
-              className="roadmap-input"
-              type="text"
-              placeholder="e.g., React, JavaScript, HTML, CSS, Git"
-              value={currentSkills}
-              onChange={(e) => setCurrentSkills(e.target.value)}
-              id="roadmap-skills"
-            />
-          </div>
-
-          <div className="roadmap-field">
-            <label className="roadmap-label">
-              Timeline
+              {timelineLabel}
             </label>
             <select
               className="roadmap-select"
@@ -115,7 +221,7 @@ const AIRoadmap = () => {
               onChange={(e) => setTimelineMonths(Number(e.target.value))}
               id="roadmap-timeline"
             >
-              {TIMELINE_OPTIONS.map((opt) => (
+              {timelineOptions.map((opt) => (
                 <option key={opt.value} value={opt.value}>
                   {opt.label}
                 </option>
@@ -133,11 +239,11 @@ const AIRoadmap = () => {
         >
           {loading ? (
             <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <LoadingBreadcrumb text="Generating Roadmap" className="text-sm" white />
+              <LoadingBreadcrumb text={loadingLabel} className="text-sm" white />
             </span>
           ) : (
             <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              Generate My Roadmap
+              {buttonLabel}
             </span>
           )}
         </Button>
@@ -177,6 +283,47 @@ const AIRoadmap = () => {
               {(result.phases || []).length} Phases
             </div>
           </div>
+
+          {result.quickReviser && (
+            <div className="roadmap-quick-reviser liquid-glass">
+              <div className="roadmap-quick-header">
+                Quick Reviser
+                <span className="roadmap-quick-pill">JD Mode</span>
+              </div>
+              <div className="roadmap-quick-grid">
+                <div className="roadmap-quick-card">
+                  <div className="roadmap-quick-title">Top Skills</div>
+                  <div className="roadmap-skills-list">
+                    {(result.quickReviser.topSkills || []).map((skill, i) => (
+                      <span key={i} className="roadmap-skill-tag">{skill}</span>
+                    ))}
+                  </div>
+                </div>
+                <div className="roadmap-quick-card">
+                  <div className="roadmap-quick-title">Key Responsibilities</div>
+                  <ul className="roadmap-quick-list">
+                    {(result.quickReviser.keyResponsibilities || []).map((item, i) => (
+                      <li key={i}>
+                        <span className="roadmap-quick-dot" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="roadmap-quick-card">
+                  <div className="roadmap-quick-title">Interview Focus</div>
+                  <ul className="roadmap-quick-list">
+                    {(result.quickReviser.interviewFocus || []).map((item, i) => (
+                      <li key={i}>
+                        <span className="roadmap-quick-dot" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Timeline */}
           <div className="roadmap-timeline">

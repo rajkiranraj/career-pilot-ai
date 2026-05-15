@@ -26,12 +26,14 @@ import LoaderScreen from "./components/LoaderScreen";
 import MockInterview from "./pages/MockInterview";
 import NotFound from "./pages/NotFound";
 
+const SPLASH_MS = 2000;
+
 const AppRoutes = () => {
   const { loading } = useAuth();
   const [showSplash, setShowSplash] = useState(true);
 
   useEffect(() => {
-    const timer = setTimeout(() => setShowSplash(false), 5000);
+    const timer = setTimeout(() => setShowSplash(false), SPLASH_MS);
     return () => clearTimeout(timer);
   }, []);
 
@@ -42,9 +44,7 @@ const AppRoutes = () => {
       {showLoader && (
         <LoaderScreen
           overlay
-          label={
-            showSplash ? "Warming up CareerPilot..." : "Checking session..."
-          }
+          label={showSplash ? "Initializing CareerPilot..." : "Checking session..."}
         />
       )}
       <Routes>

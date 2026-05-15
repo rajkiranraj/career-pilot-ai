@@ -2,15 +2,15 @@ import { motion } from "motion/react";
 import { ArrowUpRight, Play } from "lucide-react";
 import { Link } from "react-router-dom";
 import { DiaTextReveal } from "./ui/dia-text-reveal";
-import { InteractiveGrid } from "./ui/interactive-grid";
+import { TubesBackground } from "./ui/TubesBackground";
 import { ShinyButton } from "./ui/shiny-button";
 
 export const Hero = () => {
   return (
     <section className="relative overflow-hidden min-h-screen flex flex-col items-center justify-center text-center bg-black">
-      {/* Background Interactive Grid */}
+      {/* Background 3D Tubes */}
       <div className="absolute inset-0 z-0">
-        <InteractiveGrid />
+        <TubesBackground enableClickInteraction={true} />
       </div>
 
       {/* Content */}

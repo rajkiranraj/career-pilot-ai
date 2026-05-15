@@ -1,6 +1,13 @@
-import { supabase } from '../lib/supabase';
+import api, { resolveApiData } from "./api";
+import { isLaravelMode } from "../lib/backendMode";
+import { supabase } from "../lib/supabase";
 
 export const getCoverLetters = async () => {
+  if (isLaravelMode()) {
+    const response = await api.get("/cover-letter");
+    return { success: true, data: resolveApiData(response) };
+  }
+
   const { data, error } = await supabase
     .from('cover_letters')
     .select('*')
@@ -11,6 +18,11 @@ export const getCoverLetters = async () => {
 };
 
 export const generateCoverLetter = async (requestData) => {
+  if (isLaravelMode()) {
+    const response = await api.post("/cover-letter/generate", requestData);
+    return { success: true, data: resolveApiData(response) };
+  }
+
   const { data, error } = await supabase.functions.invoke('generate-cover-letter', {
     body: requestData
   });
@@ -36,6 +48,11 @@ export const generateCoverLetter = async (requestData) => {
 };
 
 export const getCoverLetter = async (id) => {
+  if (isLaravelMode()) {
+    const response = await api.get(`/cover-letter/${id}`);
+    return { success: true, data: resolveApiData(response) };
+  }
+
   const { data, error } = await supabase
     .from('cover_letters')
     .select('*')
@@ -47,6 +64,11 @@ export const getCoverLetter = async (id) => {
 };
 
 export const deleteCoverLetter = async (id) => {
+  if (isLaravelMode()) {
+    const response = await api.delete(`/cover-letter/${id}`);
+    return { success: true, data: resolveApiData(response) };
+  }
+
   const { error } = await supabase
     .from('cover_letters')
     .delete()

@@ -7,6 +7,8 @@ import {
   useRef,
 } from "react";
 import { supabase } from "../lib/supabase";
+import { getCurrentUser, signOut } from "../services/AuthService";
+import { isLaravelMode } from "../lib/backendMode";
 
 const AuthContext = createContext();
 
@@ -15,6 +17,7 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const isMounted = useRef(true);
   const fetchingRef = useRef(false);
+  const useLaravel = isLaravelMode();
 
   // Fetches the profile and merges it with the auth user
   const fetchUserProfile = useCallback(async (authUser) => {
@@ -50,8 +53,25 @@ export const AuthProvider = ({ children }) => {
 
   // Public method pages can call to refresh user data
   const checkUser = useCallback(async () => {
+    if (useLaravel) {
+      try {
+        const currentUser = await getCurrentUser();
+        if (isMounted.current) {
+          setUser(currentUser);
+        }
+      } catch (error) {
+        console.error("Auth error:", error);
+        if (isMounted.current) {
+          setUser(null);
+        }
+      }
+      return;
+    }
+
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       await fetchUserProfile(session?.user || null);
     } catch (error) {
       console.error("Auth error:", error);
@@ -59,15 +79,36 @@ export const AuthProvider = ({ children }) => {
         setUser(null);
       }
     }
-  }, [fetchUserProfile]);
+  }, [fetchUserProfile, useLaravel]);
 
   useEffect(() => {
     isMounted.current = true;
 
     // 1. Get the initial session
     const initAuth = async () => {
+      if (useLaravel) {
+        try {
+          const currentUser = await getCurrentUser();
+          if (isMounted.current) {
+            setUser(currentUser);
+          }
+        } catch (error) {
+          console.error("Init auth error:", error);
+          if (isMounted.current) {
+            setUser(null);
+          }
+        } finally {
+          if (isMounted.current) {
+            setLoading(false);
+          }
+        }
+        return;
+      }
+
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
         await fetchUserProfile(session?.user || null);
       } catch (error) {
         console.error("Init auth error:", error);
@@ -81,24 +122,34 @@ export const AuthProvider = ({ children }) => {
     initAuth();
 
     // 2. Listen for auth state changes (login, logout, token refresh)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+    if (!useLaravel) {
+      const {
+        data: { subscription },
+      } = supabase.auth.onAuthStateChange((event, session) => {
         // Only react to meaningful auth events, skip token refreshes to avoid loops
-        if (event === "SIGNED_IN" || event === "SIGNED_OUT" || event === "USER_UPDATED") {
+        if (
+          event === "SIGNED_IN" ||
+          event === "SIGNED_OUT" ||
+          event === "USER_UPDATED"
+        ) {
           if (session?.user) {
             fetchUserProfile(session.user);
           } else {
             setUser(null);
           }
         }
-      }
-    );
+      });
+
+      return () => {
+        isMounted.current = false;
+        subscription?.unsubscribe();
+      };
+    }
 
     return () => {
       isMounted.current = false;
-      subscription?.unsubscribe();
     };
-  }, [fetchUserProfile]);
+  }, [fetchUserProfile, useLaravel]);
 
   const login = (userData) => {
     setUser(userData);
@@ -106,7 +157,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      await supabase.auth.signOut();
+      await signOut();
     } catch (error) {
       console.error("Logout failed:", error);
     } finally {

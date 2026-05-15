@@ -3,10 +3,10 @@
 import { useEffect, useRef, useState } from "react";
 
 export function InteractiveGrid({
-  dotDistance = 30,
-  dotRadius = 2,
-  minProximity = 200,
-  repaintAlpha = 1,
+  dotDistance = 42,
+  dotRadius = 1.6,
+  minProximity = 160,
+  repaintAlpha = 0.9,
 }) {
   const canvasRef = useRef(null);
   const [params] = useState({
@@ -15,10 +15,22 @@ export function InteractiveGrid({
     minProximity,
     repaintAlpha,
   });
+  const [enabled, setEnabled] = useState(true);
   const [mouse, setMouse] = useState({ x: 0, y: 0 });
   const [hue, setHue] = useState(0);
   const dotsRef = useRef([]);
   const minProxSquaredRef = useRef(params.minProximity * params.minProximity);
+  const lastFrameRef = useRef(0);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const isCoarse = window.matchMedia("(pointer: coarse)");
+    const lowMemory = typeof navigator !== "undefined" && navigator.deviceMemory && navigator.deviceMemory <= 4;
+    const lowCores = typeof navigator !== "undefined" && navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4;
+    const shouldDisable = prefersReduced.matches || isCoarse.matches || lowMemory || lowCores;
+    setEnabled(!shouldDisable);
+  }, []);
 
   const createDots = (w, h) => {
     const newDots = [];
@@ -95,12 +107,19 @@ export function InteractiveGrid({
   }, [params]);
 
   useEffect(() => {
+    if (!enabled) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
     const animate = () => {
+      const now = performance.now();
+      if (now - lastFrameRef.current < 50) {
+        requestAnimationFrame(animate);
+        return;
+      }
+      lastFrameRef.current = now;
       // Clear the canvas (no background fill → transparent)
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -109,7 +128,15 @@ export function InteractiveGrid({
     };
 
     animate();
-  }, [params, mouse]);
+  }, [params, mouse, enabled]);
+
+  if (!enabled) {
+    return (
+      <div className="relative w-full h-full overflow-hidden bg-transparent">
+        <div className="absolute inset-0 bg-gradient-to-b from-white/5 via-transparent to-black/30" />
+      </div>
+    );
+  }
 
   return (
     <div className="relative w-full h-full overflow-hidden bg-transparent">

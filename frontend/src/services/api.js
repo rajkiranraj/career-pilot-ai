@@ -58,7 +58,14 @@ const api = axios.create({
 
 // Interceptor to automatically add /api prefix to non-auth routes
 api.interceptors.request.use((config) => {
-  const authRoutes = ["/login", "/register", "/logout", "/sanctum/csrf-cookie"];
+  const authRoutes = [
+    "/login",
+    "/register",
+    "/logout",
+    "/sanctum/csrf-cookie",
+    "/forgot-password",
+    "/reset-password",
+  ];
   const url = config.url || "";
   const isAuthRoute = authRoutes.some((route) => url.startsWith(route));
 
@@ -78,5 +85,13 @@ api.interceptors.response.use(
     return Promise.reject(error.response?.data || error.message);
   },
 );
+
+export const resolveApiData = (payload) => {
+  if (payload && typeof payload === "object" && "data" in payload) {
+    return payload.data;
+  }
+
+  return payload;
+};
 
 export default api;

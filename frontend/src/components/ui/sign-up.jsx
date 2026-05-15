@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
+import { TubesBackground } from "./TubesBackground";
 
 // --- SUB-COMPONENTS ---
 const GlassInputWrapper = ({ children }) => (
@@ -139,41 +140,36 @@ export const SignUpPage = ({
         </div>
       </section>
 
-      {/* Right column: hero image + testimonials */}
-      {heroImageSrc && (
-        <section className="hidden md:block flex-1 relative p-6">
-          <div
-            className="animate-slide-right animate-delay-300 absolute inset-6 rounded-[2.5rem] bg-cover bg-center overflow-hidden"
-            style={{ backgroundImage: `url(${heroImageSrc})` }}
-          >
-            <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]"></div>
+      {/* Right column: interactive tubes + testimonials */}
+      <section className="hidden md:block flex-1 relative p-6">
+        <div className="animate-slide-right animate-delay-300 absolute inset-6 rounded-[2.5rem] overflow-hidden">
+          <TubesBackground enableClickInteraction={true} />
+        </div>
+        {testimonials.length > 0 && (
+          <div className="absolute bottom-12 left-1/2 -translate-x-1/2 flex gap-6 px-12 w-full justify-center z-10">
+            <TestimonialCard
+              testimonial={testimonials[0]}
+              delay="animate-delay-800"
+            />
+            {testimonials[1] && (
+              <div className="hidden xl:flex">
+                <TestimonialCard
+                  testimonial={testimonials[1]}
+                  delay="animate-delay-1000"
+                />
+              </div>
+            )}
+            {testimonials[2] && (
+              <div className="hidden 2xl:flex">
+                <TestimonialCard
+                  testimonial={testimonials[2]}
+                  delay="animate-delay-1200"
+                />
+              </div>
+            )}
           </div>
-          {testimonials.length > 0 && (
-            <div className="absolute bottom-12 left-1/2 -translate-x-1/2 flex gap-6 px-12 w-full justify-center">
-              <TestimonialCard
-                testimonial={testimonials[0]}
-                delay="animate-delay-800"
-              />
-              {testimonials[1] && (
-                <div className="hidden xl:flex">
-                  <TestimonialCard
-                    testimonial={testimonials[1]}
-                    delay="animate-delay-1000"
-                  />
-                </div>
-              )}
-              {testimonials[2] && (
-                <div className="hidden 2xl:flex">
-                  <TestimonialCard
-                    testimonial={testimonials[2]}
-                    delay="animate-delay-1200"
-                  />
-                </div>
-              )}
-            </div>
-          )}
-        </section>
-      )}
+        )}
+      </section>
     </div>
   );
 };

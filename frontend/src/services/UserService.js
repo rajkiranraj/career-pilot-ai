@@ -1,6 +1,13 @@
+import api, { resolveApiData } from "./api";
+import { isLaravelMode } from "../lib/backendMode";
 import { supabase } from "../lib/supabase";
 
 export const getOnboardingStatus = async () => {
+  if (isLaravelMode()) {
+    const response = await api.get("/user/onboarding-status");
+    return { success: true, data: resolveApiData(response) };
+  }
+
   const {
     data: { session },
   } = await supabase.auth.getSession();
@@ -19,11 +26,6 @@ export const getOnboardingStatus = async () => {
 };
 
 export const updateUser = async (updateData) => {
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-  if (!session) return { success: false };
-
   const allowedFields = [
     "name",
     "industry",
@@ -43,6 +45,16 @@ export const updateUser = async (updateData) => {
   if (sanitized.experience !== undefined) {
     sanitized.experience = parseInt(sanitized.experience, 10) || 0;
   }
+
+  if (isLaravelMode()) {
+    const response = await api.patch("/user/update", sanitized);
+    return { success: true, data: resolveApiData(response) };
+  }
+
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  if (!session) return { success: false };
 
   const { data, error } = await supabase
     .from("profiles")

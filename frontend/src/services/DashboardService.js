@@ -1,8 +1,17 @@
-import { supabase } from '../lib/supabase';
+import api, { resolveApiData } from "./api";
+import { isLaravelMode } from "../lib/backendMode";
+import { supabase } from "../lib/supabase";
 
 export const getIndustryInsights = async () => {
+  if (isLaravelMode()) {
+    const response = await api.get("/dashboard/insights");
+    return { success: true, data: resolveApiData(response) };
+  }
+
   // First, get the user's industry from their profile
-  const { data: { session } } = await supabase.auth.getSession();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
   if (!session) return { success: false };
 
   const { data: profile } = await supabase

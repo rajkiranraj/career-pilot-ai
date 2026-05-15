@@ -4,9 +4,10 @@ import { Hero } from "../components/Hero";
 import { CareerPilotSparklesHero } from "../components/CareerPilotSparklesHero";
 import { StartSection } from "../components/StartSection";
 import { FeaturesChess, FeaturesGrid } from "../components/Features";
-import { Stats, Testimonials, CtaFooter } from "../components/FooterSections";
+import { Stats, Testimonials } from "../components/FooterSections";
 import { PricingSection } from "../components/PricingSection";
 import { ScrollShowcase } from "../components/ui/ScrollShowcase";
+import { CinematicFooter } from "../components/CinematicFooter";
 import ReactLenis from "lenis/react";
 
 export default function LandingPage() {
@@ -28,8 +29,8 @@ export default function LandingPage() {
             <Stats />
             <Testimonials />
             <PricingSection />
-            <CtaFooter />
           </div>
+          <CinematicFooter />
         </main>
       </div>
 

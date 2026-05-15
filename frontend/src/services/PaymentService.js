@@ -1,6 +1,9 @@
 import { supabase } from "../lib/supabase";
+import { ensureSupabaseMode } from "./backendGuard";
 
 export const createRazorpayOrder = async (amount, planName, callbackUrl) => {
+  ensureSupabaseMode("Payments");
+
   const { data: { session } } = await supabase.auth.getSession();
   
   if (!session?.access_token) {
@@ -29,6 +32,8 @@ export const createRazorpayOrder = async (amount, planName, callbackUrl) => {
 };
 
 export const verifyRazorpayPayment = async (paymentData, planName) => {
+  ensureSupabaseMode("Payments");
+
   const { data: { session } } = await supabase.auth.getSession();
 
   if (!session?.access_token) {

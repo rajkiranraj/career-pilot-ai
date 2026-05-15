@@ -1,12 +1,36 @@
 import Hls from "hls.js";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ArrowUpRight } from "lucide-react";
 import ScrollFloat from "./ui/ScrollFloat";
 
 export const StartSection = () => {
   const videoRef = useRef(null);
+  const sectionRef = useRef(null);
+  const [shouldPlay, setShouldPlay] = useState(false);
 
   useEffect(() => {
+    const node = sectionRef.current;
+    if (!node || typeof IntersectionObserver === "undefined") {
+      setShouldPlay(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setShouldPlay(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "200px" },
+    );
+
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!shouldPlay) return;
     const video = videoRef.current;
     if (!video) return;
 
@@ -28,13 +52,17 @@ export const StartSection = () => {
         video.play().catch((e) => console.error("Video play failed:", e));
       });
     }
-  }, []);
+  }, [shouldPlay]);
 
   return (
-    <section className="relative min-h-[500px] flex flex-col items-center justify-center text-center overflow-hidden py-20 md:py-32">
+    <section
+      ref={sectionRef}
+      className="relative min-h-[500px] flex flex-col items-center justify-center text-center overflow-hidden py-20 md:py-32"
+    >
       {/* Background Video */}
       <video
         ref={videoRef}
+        preload="metadata"
         autoPlay
         loop
         muted

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SignUpPage } from "../components/ui/sign-up";
 import { useAuth } from "../context/AuthContext";
-import { getAuthRedirectUrl, supabase } from "../lib/supabase";
+import { signUp } from "../services/AuthService";
 import { toast } from "sonner";
 
 const sampleTestimonials = [
@@ -50,21 +50,9 @@ const Register = () => {
     const password = formData.get("password");
 
     try {
-      const redirectTo = getAuthRedirectUrl();
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            name: name,
-          },
-          ...(redirectTo ? { emailRedirectTo: redirectTo } : {}),
-        },
-      });
+      const { session } = await signUp({ name, email, password });
 
-      if (error) throw error;
-
-      if (data?.session) {
+      if (session) {
         await checkUser(); // Update auth state
         toast.success("Welcome aboard! You're all set.");
         setSignupSuccess(true); // Trigger navigation via useEffect when user is set

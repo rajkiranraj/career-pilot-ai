@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useScroll, useTransform, useSpring } from "framer-motion";
+import { motion, useScroll, useTransform, useSpring, useReducedMotion } from "framer-motion";
 import React, { useRef } from "react";
 import { FileText, Briefcase, Users, MessageSquare, TrendingUp, Award, Target, Compass, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -117,9 +117,9 @@ const CharacterV3 = ({
 };
 
 export const ScrollShowcase = () => {
+  const reduceMotion = useReducedMotion();
   const targetRef = useRef(null);
   const targetRef2 = useRef(null);
-  const targetRef3 = useRef(null);
 
   const { scrollYProgress } = useScroll({
     target: targetRef,
@@ -129,15 +129,10 @@ export const ScrollShowcase = () => {
     target: targetRef2,
     offset: ["start end", "end start"]
   });
-  const { scrollYProgress: scrollYProgress3 } = useScroll({
-    target: targetRef3,
-    offset: ["start end", "end start"]
-  });
 
   const springConfig = { stiffness: 100, damping: 30, mass: 1 };
   const smoothProgress1 = useSpring(scrollYProgress, springConfig);
   const smoothProgress2 = useSpring(scrollYProgress2, springConfig);
-  const smoothProgress3 = useSpring(scrollYProgress3, springConfig);
 
   const text = "elevate your career";
   const characters = text.split("");
@@ -156,6 +151,28 @@ export const ScrollShowcase = () => {
     <Compass key="9" className={iconClasses} />,
   ];
   const iconCenterIndex = Math.floor(macIcon.length / 2);
+
+  if (reduceMotion) {
+    return (
+      <section className="w-full bg-black relative z-10 py-24 md:py-32">
+        <div className="max-w-5xl mx-auto flex flex-col items-center gap-10 text-center px-6">
+          <h2 className="text-4xl md:text-6xl font-heading italic tracking-tight text-white">
+            elevate your career
+          </h2>
+          <p className="text-xs md:text-base uppercase tracking-[0.25em] text-white/50 font-body">
+            Seamless Integration
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-3 md:gap-6">
+            {macIcon.map((icon, index) => (
+              <div key={index} className="p-2">
+                {icon}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="w-full bg-black relative z-10">
@@ -197,32 +214,6 @@ export const ScrollShowcase = () => {
               index={index}
               centerIndex={iconCenterIndex}
               scrollYProgress={smoothProgress2}
-            />
-          ))}
-        </div>
-      </div>
-      <div
-        ref={targetRef3}
-        className="relative -mt-[95vh] box-border flex h-[210vh] flex-col items-center justify-center gap-[2vw] overflow-hidden bg-transparent p-[2vw] pointer-events-none"
-      >
-        <p className="flex items-center justify-center gap-3 text-lg md:text-3xl font-body font-light tracking-widest uppercase text-white/50">
-          <Bracket className="h-8 md:h-12 text-white/20" />
-          <span>Unlock Your Potential</span>
-          <Bracket className="h-8 md:h-12 scale-x-[-1] text-white/20" />
-        </p>
-        <div
-          className="w-full max-w-4xl flex items-center justify-center flex-wrap md:flex-nowrap gap-2 md:gap-4 mt-8"
-          style={{
-            perspective: "500px",
-          }}
-        >
-          {macIcon.map((char, index) => (
-            <CharacterV3
-              key={index}
-              char={char}
-              index={index}
-              centerIndex={iconCenterIndex}
-              scrollYProgress={smoothProgress3}
             />
           ))}
         </div>

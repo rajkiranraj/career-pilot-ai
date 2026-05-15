@@ -29,6 +29,7 @@ import { updateUser, getOnboardingStatus } from "../services/UserService";
 import { industries } from "../data/industries";
 import { useAuth } from "../context/AuthContext";
 import LoaderScreen from "../components/LoaderScreen";
+import { TubesBackground } from "../components/ui/TubesBackground";
 
 const Onboarding = () => {
   const { user, loading: authLoading, checkUser } = useAuth();
@@ -134,8 +135,13 @@ const Onboarding = () => {
   const watchIndustry = watch("industry");
 
   return (
-    <div className="flex items-center justify-center bg-background py-10">
-      <Card className="w-full max-w-lg mx-2">
+    <div className="relative flex items-center justify-center bg-background py-10 min-h-screen overflow-hidden">
+      {/* Subtle ambient tubes */}
+      <div className="absolute inset-0 z-0">
+        <TubesBackground enableClickInteraction={false} opacity={0.25} />
+      </div>
+
+      <Card className="relative z-10 w-full max-w-lg mx-2">
         <CardHeader>
           <CardTitle className="gradient-title text-4xl">
             {isEditMode ? "Update Your Profile" : "Complete Your Profile"}

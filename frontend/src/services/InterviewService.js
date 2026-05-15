@@ -1,12 +1,28 @@
-import { supabase } from '../lib/supabase';
+import api, { resolveApiData } from "./api";
+import { isLaravelMode } from "../lib/backendMode";
+import { supabase } from "../lib/supabase";
 
 export const generateQuiz = async () => {
+  if (isLaravelMode()) {
+    const response = await api.get("/interview/quiz");
+    return { success: true, data: resolveApiData(response) || [] };
+  }
+
   const { data, error } = await supabase.functions.invoke('generate-quiz');
   if (error) throw error;
   return { success: true, data: data.questions || [] };
 };
 
 export const saveQuizResult = async (questions, answers, score) => {
+  if (isLaravelMode()) {
+    const response = await api.post("/interview/save-result", {
+      questions,
+      answers,
+      score,
+    });
+    return { success: true, data: resolveApiData(response) };
+  }
+
   const { data: { session } } = await supabase.auth.getSession();
   
   const { data, error } = await supabase
@@ -25,6 +41,11 @@ export const saveQuizResult = async (questions, answers, score) => {
 };
 
 export const getAssessments = async () => {
+  if (isLaravelMode()) {
+    const response = await api.get("/interview/assessments");
+    return { success: true, data: resolveApiData(response) };
+  }
+
   const { data, error } = await supabase
     .from('assessments')
     .select('*')

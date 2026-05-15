@@ -1,8 +1,11 @@
 import { supabase } from "../lib/supabase";
+import { ensureSupabaseMode } from "./backendGuard";
 
 const MAX_TEXT_CHARS = 200_000;
 
 export const parseResumeText = async (resumeText) => {
+  ensureSupabaseMode("Resume parsing");
+
   if (!resumeText || !resumeText.trim()) {
     throw new Error("Please paste your resume text first.");
   }

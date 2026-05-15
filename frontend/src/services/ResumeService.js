@@ -1,6 +1,13 @@
+import api, { resolveApiData } from "./api";
+import { isLaravelMode } from "../lib/backendMode";
 import { supabase } from "../lib/supabase";
 
 export const getResume = async () => {
+  if (isLaravelMode()) {
+    const response = await api.get("/resume");
+    return { success: true, data: resolveApiData(response) || null };
+  }
+
   const { data, error } = await supabase
     .from("resumes")
     .select("*")
@@ -13,6 +20,11 @@ export const getResume = async () => {
 };
 
 export const saveResume = async (content) => {
+  if (isLaravelMode()) {
+    const response = await api.post("/resume/save", { content });
+    return { success: true, data: resolveApiData(response) };
+  }
+
   const {
     data: { session },
   } = await supabase.auth.getSession();
@@ -27,6 +39,11 @@ export const saveResume = async (content) => {
 };
 
 export const improveResumeContent = async (current, type) => {
+  if (isLaravelMode()) {
+    const response = await api.post("/resume/improve", { current, type });
+    return { success: true, data: resolveApiData(response) };
+  }
+
   const { data, error } = await supabase.functions.invoke("improve-resume", {
     body: { resumeContent: current, type },
   });

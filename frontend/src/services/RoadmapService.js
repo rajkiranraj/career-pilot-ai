@@ -1,8 +1,9 @@
 import { supabase } from "../lib/supabase";
+import { ensureSupabaseMode } from "./backendGuard";
 
 /**
  * Call the generate-roadmap edge function to create a career transition roadmap.
- * @param {{ currentRole: string, currentSkills: string, targetRole: string, timelineMonths: number }} params
+ * @param {{ currentRole?: string, currentSkills?: string, targetRole?: string, timelineMonths?: number, jobDescription?: string }} params
  * @returns {{ result: object }}
  */
 export const generateRoadmap = async ({
@@ -10,7 +11,10 @@ export const generateRoadmap = async ({
   currentSkills,
   targetRole,
   timelineMonths,
+  jobDescription,
 }) => {
+  ensureSupabaseMode("AI Roadmap");
+
   const {
     data: { session },
   } = await supabase.auth.getSession();
@@ -20,7 +24,7 @@ export const generateRoadmap = async ({
   }
 
   const { data, error } = await supabase.functions.invoke("generate-roadmap", {
-    body: { currentRole, currentSkills, targetRole, timelineMonths },
+    body: { currentRole, currentSkills, targetRole, timelineMonths, jobDescription },
   });
 
   if (error) {

@@ -1,5 +1,5 @@
 import Hls from "hls.js";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ArrowUpRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { CardSpotlight } from "./ui/card-spotlight";
@@ -7,6 +7,8 @@ import ScrollFloat from "./ui/ScrollFloat";
 
 export const Stats = () => {
   const videoRef = useRef(null);
+  const sectionRef = useRef(null);
+  const [shouldPlay, setShouldPlay] = useState(false);
   const stats = [
     { value: "10k+", label: "Careers transformed" },
     { value: "98%", label: "Success rate" },
@@ -15,6 +17,28 @@ export const Stats = () => {
   ];
 
   useEffect(() => {
+    const node = sectionRef.current;
+    if (!node || typeof IntersectionObserver === "undefined") {
+      setShouldPlay(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setShouldPlay(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "200px" },
+    );
+
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!shouldPlay) return;
     const video = videoRef.current;
     if (!video) return;
 
@@ -35,12 +59,16 @@ export const Stats = () => {
         video.play().catch((e) => console.error("Video play failed:", e));
       });
     }
-  }, []);
+  }, [shouldPlay]);
 
   return (
-    <section className="relative min-h-[600px] md:min-h-[700px] flex items-center justify-center overflow-hidden py-24 md:py-32 lg:py-48 px-6 md:px-8 lg:px-16">
+    <section
+      ref={sectionRef}
+      className="relative min-h-[600px] md:min-h-[700px] flex items-center justify-center overflow-hidden py-24 md:py-32 lg:py-48 px-6 md:px-8 lg:px-16"
+    >
       <video
         ref={videoRef}
+        preload="metadata"
         autoPlay
         loop
         muted
@@ -125,6 +153,8 @@ export const Testimonials = () => {
               <img
                 src={review.image}
                 alt={review.name}
+                loading="lazy"
+                decoding="async"
                 className="w-12 h-12 rounded-full object-cover border border-white/20 shadow-xl"
               />
               <div className="flex flex-col gap-1">
@@ -145,8 +175,32 @@ export const Testimonials = () => {
 
 export const CtaFooter = () => {
   const videoRef = useRef(null);
+  const sectionRef = useRef(null);
+  const [shouldPlay, setShouldPlay] = useState(false);
 
   useEffect(() => {
+    const node = sectionRef.current;
+    if (!node || typeof IntersectionObserver === "undefined") {
+      setShouldPlay(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setShouldPlay(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "200px" },
+    );
+
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!shouldPlay) return;
     const video = videoRef.current;
     if (!video) return;
 
@@ -167,12 +221,16 @@ export const CtaFooter = () => {
         video.play().catch((e) => console.error("Video play failed:", e));
       });
     }
-  }, []);
+  }, [shouldPlay]);
 
   return (
-    <section className="relative min-h-[500px] md:min-h-[600px] flex flex-col items-center justify-center text-center overflow-hidden">
+    <section
+      ref={sectionRef}
+      className="relative min-h-[500px] md:min-h-[600px] flex flex-col items-center justify-center text-center overflow-hidden"
+    >
       <video
         ref={videoRef}
+        preload="metadata"
         autoPlay
         loop
         muted

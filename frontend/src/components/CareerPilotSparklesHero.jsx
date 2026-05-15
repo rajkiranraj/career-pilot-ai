@@ -1,9 +1,21 @@
 "use client";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { SparklesCore } from "@/components/ui/sparkles";
 import { BlurText } from "./BlurText";
 
 export function CareerPilotSparklesHero() {
+  const [sparklesEnabled, setSparklesEnabled] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const isCoarse = window.matchMedia("(pointer: coarse)");
+    const lowMemory = typeof navigator !== "undefined" && navigator.deviceMemory && navigator.deviceMemory <= 4;
+    const lowCores = typeof navigator !== "undefined" && navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4;
+    const enable = !(prefersReduced.matches || isCoarse.matches || lowMemory || lowCores);
+    setSparklesEnabled(enable);
+  }, []);
+
   return (
     <div className="h-[30rem] md:h-[40rem] w-full bg-black flex flex-col items-center justify-center overflow-hidden relative">
       <div className="flex flex-col items-center justify-center gap-2 md:gap-4 relative z-20 px-6">
@@ -21,14 +33,19 @@ export function CareerPilotSparklesHero() {
           <div className="absolute inset-x-20 md:inset-x-60 top-0 bg-gradient-to-r from-transparent via-sky-500 to-transparent h-px w-2/4 md:w-1/4" />
 
           {/* Core component */}
-          <SparklesCore
-            background="transparent"
-            minSize={0.4}
-            maxSize={1}
-            particleDensity={1200}
-            className="w-full h-full"
-            particleColor="#FFFFFF"
-          />
+          {sparklesEnabled ? (
+            <SparklesCore
+              background="transparent"
+              minSize={0.3}
+              maxSize={0.9}
+              speed={0.6}
+              particleDensity={240}
+              className="w-full h-full"
+              particleColor="#FFFFFF"
+            />
+          ) : (
+            <div className="absolute inset-0 bg-gradient-to-r from-white/5 via-white/15 to-white/5" />
+          )}
 
           {/* Radial Gradient to prevent sharp edges */}
           <div className="absolute inset-0 w-full h-full bg-black [mask-image:radial-gradient(250px_150px_at_top,transparent_20%,white)] md:[mask-image:radial-gradient(350px_200px_at_top,transparent_20%,white)] pointer-events-none"></div>

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SignInPage } from "../components/ui/sign-in";
 import { useAuth } from "../context/AuthContext";
-import { getAuthRedirectUrl, supabase } from "../lib/supabase";
+import { signIn, resetPassword } from "../services/AuthService";
 import { toast } from "sonner";
 
 const sampleTestimonials = [
@@ -43,17 +43,11 @@ const Login = () => {
   }, [user, loginSuccess, navigate]);
 
   const handleResetPassword = async () => {
-    // Basic implementation; you might want to show a modal to capture email first
     const email = prompt("Enter your email address to reset password:");
     if (!email) return;
 
     try {
-      const redirectTo = getAuthRedirectUrl();
-      const { error } = await supabase.auth.resetPasswordForEmail(
-        email,
-        redirectTo ? { redirectTo } : undefined,
-      );
-      if (error) throw error;
+      await resetPassword(email);
       toast.success("Password reset email sent!");
     } catch (error) {
       toast.error(error.message);
@@ -67,25 +61,17 @@ const Login = () => {
     const password = formData.get("password");
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (error) {
-        if (error.message?.toLowerCase().includes("email not confirmed")) {
-          toast.error("Please verify your email before signing in.");
-          return;
-        }
-
-        throw error;
-      }
+      await signIn({ email, password });
 
       await checkUser(); // Update auth state
       toast.success("Welcome back!");
       setLoginSuccess(true); // Trigger navigation via useEffect when user is set
     } catch (error) {
       console.error("Login failed:", error);
+      if (String(error?.message || "").toLowerCase().includes("email not confirmed")) {
+        toast.error("Please verify your email before signing in.");
+        return;
+      }
       toast.error(
         error.message || "Login failed. Please check your credentials.",
       );

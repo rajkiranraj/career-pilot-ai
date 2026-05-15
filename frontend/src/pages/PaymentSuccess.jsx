@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { verifyRazorpayPayment } from "../services/PaymentService";
 import { CheckCircle2, Loader2, XCircle } from "lucide-react";
 import { Button } from "../components/ui/button";
+import { TubesBackground } from "../components/ui/TubesBackground";
 
 export const PaymentSuccess = () => {
   const [searchParams] = useSearchParams();
@@ -61,8 +62,13 @@ export const PaymentSuccess = () => {
   }, [searchParams, navigate]);
 
   return (
-    <div className="min-h-screen pt-24 px-6 flex items-center justify-center">
-      <div className="liquid-glass border border-white/10 p-12 rounded-[2rem] max-w-md w-full text-center flex flex-col items-center gap-6">
+    <div className="min-h-screen pt-24 px-6 flex items-center justify-center relative overflow-hidden bg-black">
+      {/* Subtle ambient tubes */}
+      <div className="absolute inset-0 z-0">
+        <TubesBackground enableClickInteraction={false} opacity={0.3} />
+      </div>
+
+      <div className="relative z-10 liquid-glass border border-white/10 p-12 rounded-[2rem] max-w-md w-full text-center flex flex-col items-center gap-6">
         {status === "verifying" && (
           <>
             <Loader2 className="w-16 h-16 text-white/50 animate-spin" />

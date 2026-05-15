@@ -380,28 +380,37 @@ export default function CoverLetterGenerator() {
                 </div>
               )}
 
-              <div className="liquid-glass rounded-2xl border border-white/10 p-2">
-                <div className="bg-white text-black rounded-xl shadow-2xl overflow-hidden">
+              <div className="liquid-glass rounded-3xl border border-white/10 p-2">
+                <div className="bg-[#fcfcfb] text-slate-900 rounded-2xl shadow-[0_30px_80px_rgba(0,0,0,0.35)] overflow-hidden border border-slate-200/70">
                   {/* Document header */}
-                  <div className="border-b border-gray-200 px-8 py-6 sm:px-12">
-                    <h2 className="text-xl font-semibold text-gray-900 tracking-tight">
-                      {selectedLetter.job_title || "Cover Letter"}
-                    </h2>
-                    <p className="text-sm text-gray-500 mt-1">
-                      {selectedLetter.company_name || ""}
-                    </p>
+                  <div className="border-b border-slate-200/80 px-8 py-6 sm:px-12 bg-white/70">
+                    <div className="flex flex-wrap items-start justify-between gap-4">
+                      <div>
+                        <p className="text-[10px] uppercase tracking-[0.3em] text-slate-400">
+                          Cover Letter
+                        </p>
+                        <h2 className="text-2xl font-semibold text-slate-900 tracking-tight">
+                          {selectedLetter.job_title || "Cover Letter"}
+                        </h2>
+                        <p className="text-sm text-slate-500 mt-1">
+                          {selectedLetter.company_name || ""}
+                        </p>
+                      </div>
+                      {selectedLetter.created_at && (
+                        <span className="text-[11px] uppercase tracking-[0.2em] text-slate-400">
+                          {format(new Date(selectedLetter.created_at), "MMM d, yyyy")}
+                        </span>
+                      )}
+                    </div>
                   </div>
                   {/* Letter body */}
-                  <div
-                    className="px-8 py-8 sm:px-12 sm:py-10 leading-relaxed whitespace-pre-wrap font-serif text-gray-900"
-                    style={{
-                      fontFamily: "'Georgia', 'Times New Roman', serif",
-                      fontSize: "15px",
-                      lineHeight: "1.75",
-                      minHeight: "500px",
-                    }}
-                  >
-                    {selectedLetter.content}
+                  <div className="px-8 py-10 sm:px-12 sm:py-12">
+                    <div
+                      className="whitespace-pre-wrap font-serif text-slate-800 tracking-[0.01em] text-[15px] md:text-[16px] leading-[1.9]"
+                      style={{ fontFamily: "'Georgia', 'Times New Roman', serif", minHeight: "520px" }}
+                    >
+                      {selectedLetter.content}
+                    </div>
                   </div>
                 </div>
               </div>

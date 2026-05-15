@@ -1,4 +1,5 @@
 import { supabase } from "../lib/supabase";
+import { ensureSupabaseMode } from "./backendGuard";
 
 /**
  * Call the ats-analyzer edge function to compare resume against a JD.
@@ -7,6 +8,8 @@ import { supabase } from "../lib/supabase";
  * @returns {{ result: object }}
  */
 export const analyzeATS = async (resumeText, jobDescription) => {
+  ensureSupabaseMode("ATS Analyzer");
+
   const {
     data: { session },
   } = await supabase.auth.getSession();
