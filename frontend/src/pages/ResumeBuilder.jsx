@@ -20,11 +20,12 @@ import {
   saveResume,
 } from "../services/ResumeService";
 import { parseResumeText } from "../services/ResumeUploadService";
+import { enhanceText } from "../services/EnhanceTextService";
 import { calculateATSScore } from "../utils/atsScorer";
-import { supabase } from "../lib/supabase";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import LoaderScreen from "../components/LoaderScreen";
+import html2pdf from "html2pdf.js";
 
 // Prompt types mapped to server-side system prompts in the enhance-text edge function:
 // summary | experience | project | skills | achievement | general
@@ -306,27 +307,7 @@ export default function ResumeBuilder() {
     }
     setLoadingFields((p) => ({ ...p, [fieldKey]: true }));
     try {
-      const { data, error } = await supabase.functions.invoke("enhance-text", {
-        body: { text: val, type: promptType },
-      });
-
-      // supabase.functions.invoke error handling
-      if (error) {
-        // When edge function returns non-2xx, the body is in error.context (a Response)
-        let msg = error.message || "Edge function error";
-        if (error.context && typeof error.context.json === "function") {
-          try {
-            const errBody = await error.context.json();
-            msg = errBody.error || msg;
-          } catch {
-            /* ignore parse failure */
-          }
-        }
-        throw new Error(msg);
-      }
-
-      // data may come back as a string instead of parsed object
-      const parsed = typeof data === "string" ? JSON.parse(data) : data;
+      const parsed = await enhanceText(val, promptType);
 
       if (!parsed?.improved) {
         console.error("Unexpected response shape:", parsed);
@@ -363,22 +344,7 @@ export default function ResumeBuilder() {
     const fullText = `RESUME:\n${resumeText}\n\nATS ISSUES TO FIX:\n${suggestions}`;
     setLoadingFields((p) => ({ ...p, ats_fix: true }));
     try {
-      const { data, error } = await supabase.functions.invoke("enhance-text", {
-        body: { text: fullText, type: "ats_fix" },
-      });
-      if (error) {
-        let msg = error.message || "Edge function error";
-        if (error.context && typeof error.context.json === "function") {
-          try {
-            const errBody = await error.context.json();
-            msg = errBody.error || msg;
-          } catch {
-            // ignore parse failure
-          }
-        }
-        throw new Error(msg);
-      }
-      const parsed = typeof data === "string" ? JSON.parse(data) : data;
+      const parsed = await enhanceText(fullText, "ats_fix");
       if (parsed?.ats_fix) {
         const fix = parsed.ats_fix;
         if (fix.summary) setSummary(fix.summary);
@@ -741,10 +707,30 @@ export default function ResumeBuilder() {
     return L.join("\n");
   };
 
-  const handlePrint = () => {
-    const el = document.getElementById("print-resume");
-    if (el) el.innerHTML = getPrintHTML();
-    window.print();
+  const handleDownloadPDF = () => {
+    if (activeTab !== "preview") {
+      setActiveTab("preview");
+      toast.info("Switching to preview to generate PDF...", { duration: 1500 });
+      setTimeout(() => generatePDF(), 800);
+    } else {
+      generatePDF();
+    }
+  };
+
+  const generatePDF = () => {
+    const element = document.querySelector(".resume-preview-page");
+    if (!element) {
+      toast.error("Resume preview not found.");
+      return;
+    }
+    const opt = {
+      margin: 0,
+      filename: `${contact.fullName || 'Resume'}.pdf`,
+      image: { type: 'jpeg', quality: 1 },
+      html2canvas: { scale: 2, useCORS: true },
+      jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+    };
+    html2pdf().set(opt).from(element).save();
   };
 
   const onSubmit = async () => {
@@ -796,7 +782,7 @@ export default function ResumeBuilder() {
           </Button>
           <Button
             variant="glass-strong"
-            onClick={handlePrint}
+            onClick={handleDownloadPDF}
             className="rounded-full"
           >
             <Download className="h-4 w-4 mr-2" />

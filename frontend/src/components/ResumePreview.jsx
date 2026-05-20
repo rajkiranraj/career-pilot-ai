@@ -39,7 +39,7 @@ export default function ResumePreview({ contact, summary, skills, experiences, e
       <div className="resume-preview-wrapper">
         <div className="resume-preview-page">
           <div className="resume-empty-state">
-            <div className="icon">📄</div>
+            <div className="icon"></div>
             <h3>Your resume preview will appear here</h3>
             <p>Start filling in the form to see your resume take shape in real-time.</p>
           </div>

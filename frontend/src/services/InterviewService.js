@@ -9,7 +9,16 @@ export const generateQuiz = async () => {
   }
 
   const { data, error } = await supabase.functions.invoke('generate-quiz');
-  if (error) throw error;
+  if (error) {
+    let msg = error.message || 'Failed to generate quiz';
+    if (error.context && typeof error.context.json === 'function') {
+      try {
+        const errBody = await error.context.json();
+        msg = errBody.error || msg;
+      } catch (_) { /* ignore */ }
+    }
+    throw new Error(msg);
+  }
   return { success: true, data: data.questions || [] };
 };
 

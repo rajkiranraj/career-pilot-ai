@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { DiaTextReveal } from "./ui/dia-text-reveal";
 import { TubesBackground } from "./ui/TubesBackground";
 import { ShinyButton } from "./ui/shiny-button";
+import { SparklesCore } from "./ui/sparkles";
 
 export const Hero = () => {
   return (
@@ -15,6 +16,15 @@ export const Hero = () => {
 
       {/* Content */}
       <div className="relative z-10 px-8 pt-20 flex flex-col items-center max-w-5xl mx-auto">
+
+        <div className="flex flex-col items-center justify-center relative mb-8">
+
+          <div className="w-[15rem] md:w-[25rem] lg:w-[35rem] h-10 md:h-16 relative">
+  
+            <div className="absolute inset-0 w-full h-full [mask-image:radial-gradient(150px_50px_at_top,transparent_20%,white)]"></div>
+          </div>
+        </div>
+
         {/* Badge */}
         <div className="liquid-glass rounded-full px-1 py-1 flex items-center gap-3 mb-8">
           <span className="bg-white text-black rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wider">

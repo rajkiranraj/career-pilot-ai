@@ -6,7 +6,7 @@ import { CheckCircle2, Loader2, XCircle } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { TubesBackground } from "../components/ui/TubesBackground";
 
-export const PaymentSuccess = () => {
+const PaymentSuccess = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [status, setStatus] = useState("verifying"); // verifying, success, error

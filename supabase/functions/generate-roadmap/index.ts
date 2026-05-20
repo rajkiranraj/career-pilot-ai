@@ -2,8 +2,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 // @ts-ignore
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
-import { jsonrepair } from "https://esm.sh/jsonrepair@3.4.0";
-import { generateWithNvidia } from "../shared/nvidia.ts";
+import { generateJson } from "../shared/nvidia.ts";
 
 declare const Deno: any;
 
@@ -24,7 +23,7 @@ serve(async (req: Request) => {
       Deno.env.get("SUPABASE_ANON_KEY") ?? "",
       {
         global: {
-          headers: { Authorization: req.headers.get("Authorization")! },
+          headers: { Authorization: req.headers.get("Authorization") ?? "" },
         },
       }
     );
@@ -46,90 +45,50 @@ serve(async (req: Request) => {
     }
 
     const body = await req.json();
-    const { currentRole, currentSkills, targetRole, timelineMonths } = body;
+    const currentRole = body?.currentRole ?? body?.current_role;
+    const currentSkills = body?.currentSkills ?? body?.current_skills;
+    const targetRole = body?.targetRole ?? body?.target_role;
+    const timeline = body?.timelineMonths ?? body?.timeline_months ?? "1 week";
+    const jobDescription =
+      body?.jobDescription ?? body?.job_description ?? body?.jdInput ?? body?.jdText ?? "";
+    const hasJobDescription =
+      typeof jobDescription === "string" && jobDescription.trim().length > 0;
 
-    if (!currentRole?.trim()) {
-      throw new Error("Current role is required.");
-    }
-    if (!targetRole?.trim()) {
-      throw new Error("Target role is required.");
+    if (!hasJobDescription) {
+      if (!currentRole?.trim() || !targetRole?.trim()) {
+        throw new Error("When not providing a job description, both 'Current Role' and 'Target Role' are required.");
+      }
     }
 
-    const months = timelineMonths || 6;
     const skills = currentSkills?.trim() || "None specified";
+    const resolvedTargetRole = targetRole?.trim() || "Infer from job description";
+    const resolvedCurrentRole = currentRole?.trim() || "Not specified";
+    const jdText = typeof jobDescription === "string" ? jobDescription.trim() : "";
 
-    const prompt = `
-You are an expert career coach. Create a brief, actionable career roadmap.
+    const jdSection = hasJobDescription
+      ? `\nJOB DESCRIPTION:\n${jdText.slice(0, 6000)}\n`
+      : "";
 
-CURRENT ROLE: ${currentRole}
+    const prompt = `You are an expert career coach. Create a concise, actionable career roadmap as JSON.
+${jdSection}
+CURRENT ROLE: ${resolvedCurrentRole}
 CURRENT SKILLS: ${skills}
-TARGET ROLE: ${targetRole}
-TIMELINE: ${months} months
+TARGET ROLE: ${resolvedTargetRole}
+TIMELINE: ${timeline}
 
-Return ONLY a valid JSON object in exactly this format:
-{
-  "title": "From [Current Role] to [Target Role]",
-  "totalMonths": ${months},
-  "weeklyHours": 10,
-  "phases": [
-    {
-      "name": "Phase name",
-      "month": "Month X-Y",
-      "description": "Brief description",
-      "skills": ["skill1", "skill2"],
-      "resources": [
-        { "name": "Resource name", "type": "course", "url": "https://example.com" }
-      ],
-      "milestones": ["Milestone 1"],
-      "projects": ["Project idea"]
-    }
-  ],
-  "tips": ["Tip 1", "Tip 2"]
-}
+IMPORTANT: Return ONLY raw JSON. No markdown code blocks, no explanation text. Start directly with {
 
-Rules:
-- Create exactly 3 phases
-- Each phase should have exactly 2 skills, 1-2 resources with REAL URLs, 1 milestone, and 1 project idea
-- Return only valid JSON.
-`;
+Required JSON structure:
+{"title":"...","totalMonths":"${timeline}","weeklyHours":8,"quickReviser":{"topSkills":["s1","s2","s3","s4","s5","s6"],"keyResponsibilities":["r1","r2","r3","r4"],"interviewFocus":["f1","f2","f3"]},"phases":[{"name":"Phase 1","month":"Week 1","description":"...","skills":["s1","s2"],"resources":[{"name":"...","type":"course","url":"https://..."}],"milestones":["..."],"projects":["..."]},{"name":"Phase 2","month":"Week 2","description":"...","skills":["s1","s2"],"resources":[{"name":"...","type":"course","url":"https://..."}],"milestones":["..."],"projects":["..."]},{"name":"Phase 3","month":"Week 3","description":"...","skills":["s1","s2"],"resources":[{"name":"...","type":"course","url":"https://..."}],"milestones":["..."],"projects":["..."]}],"tips":["tip1","tip2","tip3"]}
 
-    const raw = await generateWithNvidia(prompt, {
+Fill in all values based on the role and timeline. Use real resource URLs. Return only valid JSON.`;
+
+    const parsed = await generateJson(prompt, {
       systemPrompt: "You are a strict JSON generator. Return only valid JSON.",
-      maxTokens: 2048,
-      temperature: 0.1,
+      maxTokens: 3000,
+      temperature: 0.05,
     });
 
-    const extractJson = (text: string) => {
-      let cleaned = text.trim();
-      const match = cleaned.match(/^```(?:json)?\s*([\s\S]*?)\s*```$/i);
-      if (match) cleaned = match[1].trim();
-      const first = cleaned.indexOf("{");
-      const last = cleaned.lastIndexOf("}");
-      if (first !== -1 && last !== -1 && last > first) {
-        cleaned = cleaned.slice(first, last + 1);
-      }
-      try {
-        return JSON.parse(cleaned);
-      } catch {
-        try {
-          const repaired = cleaned
-            .replace(/,\s*}/g, "}")
-            .replace(/,\s*]/g, "]")
-            .replace(/\n/g, "\\n")
-            .replace(/\r/g, "\\r")
-            .replace(/\t/g, "\\t");
-          return JSON.parse(repaired);
-        } catch {
-          try {
-            return JSON.parse(jsonrepair(cleaned));
-          } catch {
-            return null;
-          }
-        }
-      }
-    };
-
-    const parsed = extractJson(raw);
     if (!parsed) {
         throw new Error("Failed to parse roadmap from AI");
     }

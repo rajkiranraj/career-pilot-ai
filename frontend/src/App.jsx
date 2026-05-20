@@ -23,7 +23,6 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 import { Toaster } from "./components/ui/sonner";
 import LoaderScreen from "./components/LoaderScreen";
 
-import MockInterview from "./pages/MockInterview";
 import NotFound from "./pages/NotFound";
 
 const SPLASH_MS = 2000;
@@ -58,7 +57,6 @@ const AppRoutes = () => {
             <Route path="/onboarding" element={<Onboarding />} />
             <Route path="/resume" element={<ResumeBuilder />} />
             <Route path="/interview" element={<InterviewPrep />} />
-            <Route path="/interview/mock" element={<MockInterview />} />
             <Route path="/ai-cover-letter" element={<CoverLetterGenerator />} />
             <Route
               path="/ai-cover-letter/:id"

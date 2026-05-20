@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { Trash2, Plus, Copy, Check } from "lucide-react";
+import { Trash2, Plus, Copy, Check, Download } from "lucide-react";
 import { Button } from "../components/ui/button";
 import {
   Card,
@@ -37,6 +37,7 @@ import { useAuth } from "../context/AuthContext";
 import { format } from "date-fns";
 import LoaderScreen from "../components/LoaderScreen";
 import { LoadingBreadcrumb } from "../components/ui/animated-loading-svg-text-shimmer";
+import html2pdf from "html2pdf.js";
 
 export default function CoverLetterGenerator() {
   const { user, loading: authLoading } = useAuth();
@@ -138,6 +139,22 @@ export default function CoverLetterGenerator() {
     } catch (error) {
       toast.error(error.message || "Failed to delete cover letter");
     }
+  };
+
+  const handleDownloadPDF = () => {
+    const element = document.getElementById("cover-letter-preview");
+    if (!element) {
+      toast.error("Cover letter preview not found");
+      return;
+    }
+    const opt = {
+      margin: 0,
+      filename: `Cover_Letter_${selectedLetter?.company_name || 'Draft'}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true },
+      jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+    };
+    html2pdf().set(opt).from(element).save();
   };
 
   if (loading) {
@@ -371,6 +388,14 @@ export default function CoverLetterGenerator() {
                   <Plus className="h-4 w-4 mr-2" />
                   Generate Another
                 </Button>
+                <Button
+                  variant="glass-strong"
+                  onClick={handleDownloadPDF}
+                  className="rounded-full"
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  Download PDF
+                </Button>
               </div>
 
               {selectedLetter._dbSaveFailed && (
@@ -380,38 +405,54 @@ export default function CoverLetterGenerator() {
                 </div>
               )}
 
-              <div className="liquid-glass rounded-3xl border border-white/10 p-2">
-                <div className="bg-[#fcfcfb] text-slate-900 rounded-2xl shadow-[0_30px_80px_rgba(0,0,0,0.35)] overflow-hidden border border-slate-200/70">
+              <div className="liquid-glass rounded-3xl border border-white/10 p-4 md:p-6 flex justify-center">
+                <div 
+                  id="cover-letter-preview"
+                  className="bg-white text-slate-900 w-full max-w-[800px] shadow-[0_20px_60px_rgba(0,0,0,0.15)] overflow-hidden relative"
+                  style={{
+                    fontFamily: "'Inter', 'Helvetica Neue', Arial, sans-serif",
+                  }}
+                >
+                  {/* Accent stripe at the top */}
+                  <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-slate-900 via-blue-600 to-sky-400 opacity-90" />
+                  
                   {/* Document header */}
-                  <div className="border-b border-slate-200/80 px-8 py-6 sm:px-12 bg-white/70">
-                    <div className="flex flex-wrap items-start justify-between gap-4">
-                      <div>
-                        <p className="text-[10px] uppercase tracking-[0.3em] text-slate-400">
-                          Cover Letter
-                        </p>
-                        <h2 className="text-2xl font-semibold text-slate-900 tracking-tight">
+                  <div className="border-b border-slate-200/60 px-10 py-10 sm:px-16 sm:py-12 bg-[#fafafa]">
+                    <div className="flex flex-col sm:flex-row items-start justify-between gap-6">
+                      <div className="space-y-1 text-left">
+                        <h2 className="text-3xl font-bold text-slate-900 tracking-tight uppercase" style={{ fontFamily: "'Merriweather', 'Georgia', serif" }}>
                           {selectedLetter.job_title || "Cover Letter"}
                         </h2>
-                        <p className="text-sm text-slate-500 mt-1">
+                        <p className="text-[14px] font-medium text-slate-500 tracking-wide uppercase">
                           {selectedLetter.company_name || ""}
                         </p>
                       </div>
                       {selectedLetter.created_at && (
-                        <span className="text-[11px] uppercase tracking-[0.2em] text-slate-400">
-                          {format(new Date(selectedLetter.created_at), "MMM d, yyyy")}
-                        </span>
+                        <div className="text-right">
+                          <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400 mb-1">Date Generated</p>
+                          <span className="text-[12px] font-medium text-slate-600">
+                            {format(new Date(selectedLetter.created_at), "MMMM d, yyyy")}
+                          </span>
+                        </div>
                       )}
                     </div>
                   </div>
+                  
                   {/* Letter body */}
-                  <div className="px-8 py-10 sm:px-12 sm:py-12">
+                  <div className="px-10 py-12 sm:px-16 sm:py-14 text-left">
                     <div
-                      className="whitespace-pre-wrap font-serif text-slate-800 tracking-[0.01em] text-[15px] md:text-[16px] leading-[1.9]"
-                      style={{ fontFamily: "'Georgia', 'Times New Roman', serif", minHeight: "520px" }}
+                      className="whitespace-pre-wrap text-slate-800 text-[14px] leading-[1.8] tracking-[0.01em]"
+                      style={{ 
+                        fontFamily: "'Inter', 'Helvetica Neue', Arial, sans-serif", 
+                        minHeight: "520px" 
+                      }}
                     >
                       {selectedLetter.content}
                     </div>
                   </div>
+                  
+                  {/* Footer decoration */}
+                  <div className="h-6 bg-[#fafafa] border-t border-slate-100 w-full" />
                 </div>
               </div>
             </div>

@@ -20,7 +20,7 @@ serve(async (req: Request) => {
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      { global: { headers: { Authorization: req.headers.get('Authorization')! } } }
+      { global: { headers: { Authorization: req.headers.get('Authorization') ?? '' } } }
     )
 
     const allowBypass =
@@ -56,8 +56,8 @@ serve(async (req: Request) => {
       throw new Error('Please complete onboarding first')
     }
 
-    const industry = profile.industry.replace(/-/g, ' ')
-    const skills = profile.skills || []
+    const industry = (profile?.industry || 'general professional').replace(/-/g, ' ')
+    const skills = profile?.skills || []
 
     const prompt = `
       Generate comprehensive industry insights for the "${industry}" sector.
@@ -106,14 +106,8 @@ serve(async (req: Request) => {
       )
     }
 
-    // Check if we already have fresh insights for this industry
-    const { data: existingInsight } = await supabaseClient
-      .from('industry_insights')
-      .select('*')
-      .eq('industry', profile.industry)
-      .single()
-
-    const data = await generateJson(prompt)
+    // Generate insights via NVIDIA
+    const data = await generateJson(prompt);
 
     // Calculate next update (7 days from now)
     const nextUpdate = new Date()

@@ -48,11 +48,13 @@ serve(async (req: Request) => {
       user = authUser;
     }
 
-    const { resumeContent } = await req.json();
+    const { resumeContent, type } = await req.json();
 
     if (!resumeContent) {
       throw new Error("resumeContent is required");
     }
+
+    const analysisType = type || "resume";
 
     // Get user profile for context
     let profile: { industry?: string; skills?: string[] } | null = null;

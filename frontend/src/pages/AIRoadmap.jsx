@@ -5,23 +5,20 @@ import { LoadingBreadcrumb } from "../components/ui/animated-loading-svg-text-sh
 import "../styles/roadmap.css";
 
 const TIMELINE_PRESETS = [
-  { value: 3, name: "Sprint" },
-  { value: 6, name: "Standard" },
-  { value: 9, name: "Thorough" },
-  { value: 12, name: "Deep Dive" },
+  { value: "1 day", name: "1 Day - Flash Sprint" },
+  { value: "1 week", name: "1 Week - Quick Sprint" },
+  { value: "1 month", name: "1 Month - Power Month" },
+  { value: "3 months", name: "3 Months - Quarter Blitz" },
+  { value: "6 months", name: "6 Months - Deep Dive" },
+  { value: "12 months", name: "12 Months - Full Mastery" },
 ];
 
 const ROLE_TIMELINE_OPTIONS = TIMELINE_PRESETS.map((preset) => ({
   value: preset.value,
-  label: `${preset.value} Months — ${preset.name}`,
+  label: preset.name,
 }));
 
-const HOURS_PER_MONTH = 40;
-
-const JD_TIMELINE_OPTIONS = TIMELINE_PRESETS.map((preset) => ({
-  value: preset.value,
-  label: `${preset.value * HOURS_PER_MONTH} Hours — ${preset.name}`,
-}));
+const JD_TIMELINE_OPTIONS = ROLE_TIMELINE_OPTIONS;
 
 const RESOURCE_ICONS = {
   course: "",
@@ -36,7 +33,7 @@ const AIRoadmap = () => {
   const [currentRole, setCurrentRole] = useState("");
   const [currentSkills, setCurrentSkills] = useState("");
   const [targetRole, setTargetRole] = useState("");
-  const [timelineMonths, setTimelineMonths] = useState(6);
+  const [timelineMonths, setTimelineMonths] = useState("1 week");
   const [jobDescription, setJobDescription] = useState("");
   const [jdTargetRole, setJdTargetRole] = useState("");
   const [result, setResult] = useState(null);
@@ -47,7 +44,7 @@ const AIRoadmap = () => {
   const loadingLabel = isJDMode ? "Generating Reviser + Roadmap" : "Generating Roadmap";
   const buttonLabel = isJDMode ? "Generate Reviser + Roadmap" : "Generate My Roadmap";
   const timelineOptions = isJDMode ? JD_TIMELINE_OPTIONS : ROLE_TIMELINE_OPTIONS;
-  const timelineLabel = isJDMode ? "Timeline (hours)" : "Timeline";
+  const timelineLabel = "Timeline";
 
   const handleModeChange = useCallback((nextMode) => {
     setMode(nextMode);
@@ -75,7 +72,8 @@ const AIRoadmap = () => {
       const payload = isJDMode
         ? {
             jobDescription: jobDescription.trim(),
-            targetRole: jdTargetRole.trim() || undefined,
+            currentRole: "Candidate",
+            targetRole: jdTargetRole.trim() || "Target Role",
             timelineMonths,
           }
         : {
@@ -218,7 +216,7 @@ const AIRoadmap = () => {
             <select
               className="roadmap-select"
               value={timelineMonths}
-              onChange={(e) => setTimelineMonths(Number(e.target.value))}
+              onChange={(e) => setTimelineMonths(e.target.value)}
               id="roadmap-timeline"
             >
               {timelineOptions.map((opt) => (
@@ -272,7 +270,7 @@ const AIRoadmap = () => {
           {/* Meta Badges */}
           <div className="roadmap-meta">
             <div className="roadmap-meta-badge liquid-glass">
-              {result.totalMonths || timelineMonths} Months
+              {result.totalMonths || timelineMonths}
             </div>
             {result.weeklyHours && (
               <div className="roadmap-meta-badge liquid-glass">
@@ -288,7 +286,7 @@ const AIRoadmap = () => {
             <div className="roadmap-quick-reviser liquid-glass">
               <div className="roadmap-quick-header">
                 Quick Reviser
-                <span className="roadmap-quick-pill">JD Mode</span>
+                <span className="roadmap-quick-pill">Quick Reviser</span>
               </div>
               <div className="roadmap-quick-grid">
                 <div className="roadmap-quick-card">

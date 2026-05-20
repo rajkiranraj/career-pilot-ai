@@ -48,6 +48,9 @@ html {
     --accent: 213 45% 15%;
     --accent-foreground: 0 0% 100%;
     --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 100%;
+    --popover: 213 45% 10%;
+    --popover-foreground: 0 0% 100%;
     --border: 0 0% 100% / 0.1;
     --input: 0 0% 100% / 0.1;
     --ring: 0 0% 100% / 0.2;
@@ -61,7 +64,6 @@ html {
 
 :root {
   --glass-opacity: 0.21;
-  --glass-blur: 4px;
   --glass-strong-blur: 50px;
 }
 
