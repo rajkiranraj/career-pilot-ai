@@ -20,9 +20,13 @@ class InterviewController extends Controller
 
     public function generateQuiz()
     {
-        $user = Auth::user();
-        $questions = $this->interviewService->generateQuiz($user);
-        return $this->success($questions);
+        try {
+            $user = Auth::user();
+            $questions = $this->interviewService->generateQuiz($user);
+            return $this->success($questions);
+        } catch (\Exception $e) {
+            return $this->error('Failed to generate quiz: ' . $e->getMessage(), null, 503);
+        }
     }
 
     public function saveResult(SaveQuizResultRequest $request)

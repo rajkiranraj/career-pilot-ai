@@ -35,12 +35,35 @@ class ResumeController extends Controller
 
     public function improve(ImproveResumeRequest $request)
     {
-        $user = Auth::user();
-        $improvedContent = $this->resumeService->improveWithAI(
-            $user,
-            $request->current,
-            $request->type
-        );
-        return $this->success($improvedContent);
+        try {
+            $user = Auth::user();
+            $improvedContent = $this->resumeService->improveWithAI(
+                $user,
+                $request->current,
+                $request->type
+            );
+            return $this->success($improvedContent);
+        } catch (\Exception $e) {
+            return $this->error('Failed to improve content: ' . $e->getMessage(), null, 503);
+        }
+    }
+
+    public function parseText()
+    {
+        try {
+            $user = Auth::user();
+            $request = request()->validate([
+                'resumeText' => 'required|string'
+            ]);
+
+            $parsedData = $this->resumeService->parseResumeText($request['resumeText']);
+            
+            return $this->success([
+                'parsed' => $parsedData,
+                'partial' => false
+            ], 'Resume parsed successfully');
+        } catch (\Exception $e) {
+            return $this->error('Failed to parse resume: ' . $e->getMessage(), null, 500);
+        }
     }
 }

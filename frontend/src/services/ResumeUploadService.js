@@ -1,17 +1,22 @@
 import { supabase } from "../lib/supabase";
-import { ensureSupabaseMode } from "./backendGuard";
+import { isLaravelMode } from "../lib/backendMode";
+import api, { resolveApiData } from "./api";
 
 const MAX_TEXT_CHARS = 200_000;
 
 export const parseResumeText = async (resumeText) => {
-  ensureSupabaseMode("Resume parsing");
-
   if (!resumeText || !resumeText.trim()) {
     throw new Error("Please paste your resume text first.");
   }
 
   if (resumeText.length > MAX_TEXT_CHARS) {
     throw new Error("Resume text exceeds the 200k character limit.");
+  }
+
+  if (isLaravelMode()) {
+    const response = await api.post("/resume/parse", { resumeText });
+    const data = resolveApiData(response);
+    return { parsed: data?.parsed || null, partial: data?.partial || false };
   }
 
   const {

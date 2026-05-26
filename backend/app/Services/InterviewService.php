@@ -22,6 +22,7 @@ class InterviewService
           Generate 10 technical interview questions for a {$user->industry} professional{$skillsText}.
           
           Each question should be multiple choice with 4 options.
+          Keep explanations brief (1 sentence max).
           
           Return the response in this JSON format only, no additional text:
           {
@@ -36,7 +37,10 @@ class InterviewService
           }
         ";
 
-        $data = $this->nvidia->generateJson($prompt);
+        $data = $this->nvidia->generateJson($prompt, [
+            'max_tokens' => 4096,
+            'temperature' => 0.1,
+        ]);
         return $data['questions'] ?? [];
     }
 

@@ -54,7 +54,7 @@ html {
     --border: 0 0% 100% / 0.1;
     --input: 0 0% 100% / 0.1;
     --ring: 0 0% 100% / 0.2;
-    --radius: 9999px;
+    --radius: 1rem;
     --glass-bg: rgba(255, 255, 255, 0.03);
     --glass-border: rgba(255, 255, 255, 0.1);
     --glass-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
@@ -304,3 +304,207 @@ html {
     size: letter;
   }
 }
+
+/* ── Fast Loader Animations (Pure CSS / GPU-composited) ──────── */
+
+.loader-screen-container {
+  animation: loaderAppear 0.2s ease-out both;
+}
+
+.loader-fade-out {
+  animation: loaderDisappear 0.25s ease-in both;
+}
+
+.loader-bolt-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+}
+
+.loader-bolt-svg {
+  width: 40px;
+  height: 40px;
+  stroke: white;
+  filter: drop-shadow(0 0 14px rgba(255, 255, 255, 0.7));
+  animation: boltPulse 0.7s ease-in-out infinite alternate;
+  will-change: transform, opacity;
+}
+
+.loader-bolt-path {
+  fill: rgba(255, 255, 255, 0.9);
+  stroke: rgba(255, 255, 255, 1);
+  stroke-width: 0.8;
+}
+
+.loader-bolt-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  border-top-color: rgba(255, 255, 255, 0.8);
+  border-right-color: rgba(255, 255, 255, 0.3);
+  animation: ringRotate 0.6s linear infinite;
+  will-change: transform;
+}
+
+.loader-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+  color: rgba(255, 255, 255, 0.7);
+  animation: labelFade 0.4s ease-out 0.1s both;
+}
+
+.loader-track {
+  height: 3px;
+  width: 160px;
+  overflow: hidden;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.loader-track-bar {
+  height: 100%;
+  width: 40%;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.8), transparent);
+  animation: trackSweep 0.8s ease-in-out infinite;
+  will-change: transform;
+}
+
+@keyframes loaderAppear {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes loaderDisappear {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes boltPulse {
+  from {
+    transform: scale(0.92);
+    opacity: 0.7;
+    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.4));
+  }
+  to {
+    transform: scale(1.08);
+    opacity: 1;
+    filter: drop-shadow(0 0 18px rgba(255, 255, 255, 0.9));
+  }
+}
+
+@keyframes ringRotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes labelFade {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes trackSweep {
+  0% {
+    transform: translateX(-160%);
+  }
+  100% {
+    transform: translateX(320%);
+  }
+}
+
+/* ── Quiz Premium Animations ──────────────────────────────── */
+
+.quiz-fade-in {
+  opacity: 0;
+  transform: translateY(16px);
+  animation: quizFadeIn 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.quiz-option-enter {
+  opacity: 0;
+  transform: translateY(12px) scale(0.98);
+  animation: quizOptionEnter 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.quiz-question-enter {
+  opacity: 0;
+  transform: translateY(8px);
+  animation: quizQuestionEnter 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.quiz-explanation-enter {
+  opacity: 0;
+  transform: translateY(8px) scale(0.99);
+  animation: quizExplanationEnter 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.quiz-result-enter {
+  opacity: 0;
+  transform: scale(0.95) translateY(20px);
+  animation: quizResultEnter 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes quizFadeIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes quizOptionEnter {
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes quizQuestionEnter {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes quizExplanationEnter {
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes quizResultEnter {
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes quizProgressPulse {
+  0%, 100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+

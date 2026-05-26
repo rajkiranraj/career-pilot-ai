@@ -1,5 +1,6 @@
 import { supabase } from "../lib/supabase";
-import { ensureSupabaseMode } from "./backendGuard";
+import { isLaravelMode } from "../lib/backendMode";
+import api, { resolveApiData } from "./api";
 
 /**
  * Call the generate-roadmap edge function to create a career transition roadmap.
@@ -13,7 +14,17 @@ export const generateRoadmap = async ({
   timelineMonths,
   jobDescription,
 }) => {
-  ensureSupabaseMode("AI Roadmap");
+  if (isLaravelMode()) {
+    const response = await api.post("/roadmap/generate", {
+      currentRole,
+      currentSkills,
+      targetRole,
+      timelineMonths,
+      jobDescription,
+    });
+    const data = resolveApiData(response);
+    return data?.result || null;
+  }
 
   const {
     data: { session },

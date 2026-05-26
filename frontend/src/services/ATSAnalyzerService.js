@@ -1,5 +1,6 @@
 import { supabase } from "../lib/supabase";
-import { ensureSupabaseMode } from "./backendGuard";
+import { isLaravelMode } from "../lib/backendMode";
+import api, { resolveApiData } from "./api";
 
 /**
  * Call the ats-analyzer edge function to compare resume against a JD.
@@ -8,7 +9,11 @@ import { ensureSupabaseMode } from "./backendGuard";
  * @returns {{ result: object }}
  */
 export const analyzeATS = async (resumeText, jobDescription) => {
-  ensureSupabaseMode("ATS Analyzer");
+  if (isLaravelMode()) {
+    const response = await api.post("/ats-analyze", { resumeText, jobDescription });
+    const data = resolveApiData(response);
+    return data?.result || null;
+  }
 
   const {
     data: { session },

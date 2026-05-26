@@ -20,9 +20,13 @@ class CoverLetterController extends Controller
 
     public function generate(GenerateCoverLetterRequest $request)
     {
-        $user = Auth::user();
-        $coverLetter = $this->coverLetterService->generateCoverLetter($user, $request->validated());
-        return $this->success($coverLetter, 'Cover letter generated successfully');
+        try {
+            $user = Auth::user();
+            $coverLetter = $this->coverLetterService->generateCoverLetter($user, $request->validated());
+            return $this->success($coverLetter, 'Cover letter generated successfully');
+        } catch (\Exception $e) {
+            return $this->error('Failed to generate cover letter: ' . $e->getMessage(), null, 503);
+        }
     }
 
     public function index()
@@ -37,6 +41,17 @@ class CoverLetterController extends Controller
         $user = Auth::user();
         $coverLetter = $this->coverLetterService->getCoverLetter($user, $id);
         return $this->success($coverLetter);
+    }
+
+    public function update($id)
+    {
+        $user = Auth::user();
+        $data = request()->validate([
+            'content' => 'required|string'
+        ]);
+        
+        $coverLetter = $this->coverLetterService->updateCoverLetter($user, $id, $data['content']);
+        return $this->success($coverLetter, 'Cover letter updated successfully');
     }
 
     public function destroy($id)

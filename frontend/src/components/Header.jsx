@@ -10,6 +10,7 @@ import {
   LogOut,
   User,
   Settings,
+  BriefcaseIcon,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -130,6 +131,20 @@ export default function Header() {
                           <span className="font-medium">AI Roadmap</span>
                           <span className="text-[10px] text-white/40">
                             Career learning path
+                          </span>
+                        </div>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      asChild
+                      className="rounded-xl focus:bg-white/10 focus:text-white cursor-pointer p-3"
+                    >
+                      <Link to="/remote-jobs" className="flex items-center gap-3">
+                        <BriefcaseIcon className="h-4 w-4" />
+                        <div className="flex flex-col">
+                          <span className="font-medium">Job Board</span>
+                          <span className="text-[10px] text-white/40">
+                            Remote & on-site opportunities
                           </span>
                         </div>
                       </Link>

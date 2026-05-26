@@ -63,6 +63,23 @@ export const getCoverLetter = async (id) => {
   return { success: true, data };
 };
 
+export const updateCoverLetter = async (id, content) => {
+  if (isLaravelMode()) {
+    const response = await api.patch(`/cover-letter/${id}`, { content });
+    return { success: true, data: resolveApiData(response) };
+  }
+
+  const { data, error } = await supabase
+    .from('cover_letters')
+    .update({ content })
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return { success: true, data };
+};
+
 export const deleteCoverLetter = async (id) => {
   if (isLaravelMode()) {
     const response = await api.delete(`/cover-letter/${id}`);

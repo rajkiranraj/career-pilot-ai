@@ -1,5 +1,6 @@
 import { supabase } from "../lib/supabase";
-import { ensureSupabaseMode } from "./backendGuard";
+import { isLaravelMode } from "../lib/backendMode";
+import api, { resolveApiData } from "./api";
 
 /**
  * Call the enhance-text edge function to improve resume text.
@@ -8,10 +9,16 @@ import { ensureSupabaseMode } from "./backendGuard";
  * @returns {Promise<{ improved?: string, ats_fix?: object }>}
  */
 export const enhanceText = async (text, type = "general") => {
-  ensureSupabaseMode("Enhance Text");
-
   if (!text?.trim()) {
     throw new Error("Please enter content to enhance.");
+  }
+
+  if (isLaravelMode()) {
+    const response = await api.post("/enhance-text", { text, type });
+    const data = resolveApiData(response);
+    // data may come back as a string instead of parsed object
+    const parsed = typeof data === "string" ? JSON.parse(data) : data;
+    return parsed;
   }
 
   const { data, error } = await supabase.functions.invoke("enhance-text", {

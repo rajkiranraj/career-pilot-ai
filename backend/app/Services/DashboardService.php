@@ -40,7 +40,9 @@ class DashboardService
           Include at least 5 skills and trends.
         ";
 
-        return $this->nvidia->generateJson($prompt);
+        return $this->nvidia->generateJson($prompt, [
+            'max_tokens' => 4096,
+        ]);
     }
 
     public function getIndustryInsights(User $user)

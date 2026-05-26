@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { Trash2, Plus, Copy, Check, Download } from "lucide-react";
+import { Trash2, Plus, Copy, Check, Download, Briefcase, FileText, Sparkles, PencilLine, Loader2 } from "lucide-react";
 import { Button } from "../components/ui/button";
 import {
   Card,
@@ -30,6 +30,7 @@ import {
   getCoverLetters,
   deleteCoverLetter,
   getCoverLetter,
+  updateCoverLetter,
 } from "../services/CoverLetterService";
 import { coverLetterSchema } from "../lib/schema";
 import { useNavigate, useParams, Link } from "react-router-dom";
@@ -37,7 +38,7 @@ import { useAuth } from "../context/AuthContext";
 import { format } from "date-fns";
 import LoaderScreen from "../components/LoaderScreen";
 import { LoadingBreadcrumb } from "../components/ui/animated-loading-svg-text-shimmer";
-import html2pdf from "html2pdf.js";
+import Markdown from "react-markdown";
 
 export default function CoverLetterGenerator() {
   const { user, loading: authLoading } = useAuth();
@@ -55,6 +56,10 @@ export default function CoverLetterGenerator() {
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
+  
+  const [isEditing, setIsEditing] = useState(false);
+  const [editContent, setEditContent] = useState("");
+  const [savingEdit, setSavingEdit] = useState(false);
 
   const {
     register,
@@ -99,9 +104,30 @@ export default function CoverLetterGenerator() {
       } else {
         setSelectedLetter(null);
       }
+      setIsEditing(false);
+      setEditContent("");
     };
     loadData();
   }, [id]);
+
+  const handleSaveEdit = async () => {
+    if (!selectedLetter || !editContent.trim()) return;
+    setSavingEdit(true);
+    try {
+      const response = await updateCoverLetter(selectedLetter.id, editContent);
+      if (response.success) {
+        toast.success("Cover letter updated successfully!");
+        const updatedLetter = { ...selectedLetter, content: editContent };
+        setSelectedLetter(updatedLetter);
+        setCoverLetters(coverLetters.map(l => l.id === selectedLetter.id ? updatedLetter : l));
+        setIsEditing(false);
+      }
+    } catch (error) {
+      toast.error(error.message || "Failed to update cover letter");
+    } finally {
+      setSavingEdit(false);
+    }
+  };
 
   const onSubmit = async (data) => {
     setGenerating(true);
@@ -142,19 +168,102 @@ export default function CoverLetterGenerator() {
   };
 
   const handleDownloadPDF = () => {
-    const element = document.getElementById("cover-letter-preview");
-    if (!element) {
-      toast.error("Cover letter preview not found");
+    if (!selectedLetter) {
+      toast.error("No cover letter selected");
       return;
     }
-    const opt = {
-      margin: 0,
-      filename: `Cover_Letter_${selectedLetter?.company_name || 'Draft'}.pdf`,
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true },
-      jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-    };
-    html2pdf().set(opt).from(element).save();
+
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) {
+      toast.error("Please allow pop-ups to download PDF");
+      return;
+    }
+
+    const content = selectedLetter.content || "";
+    // Convert markdown-style formatting to simple HTML for the print view
+    const htmlContent = content
+      .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+      .replace(/\*(.*?)\*/g, "<em>$1</em>")
+      .replace(/^### (.*$)/gm, '<h3 style="margin:18px 0 8px;font-size:14px;font-weight:700;">$1</h3>')
+      .replace(/^## (.*$)/gm, '<h2 style="margin:20px 0 10px;font-size:16px;font-weight:700;">$1</h2>')
+      .replace(/^# (.*$)/gm, '<h1 style="margin:24px 0 12px;font-size:18px;font-weight:700;">$1</h1>')
+      .replace(/^---$/gm, '<hr style="border:none;border-top:1px solid #e2e8f0;margin:20px 0;">')
+      .replace(/\n\n/g, "</p><p>")
+      .replace(/\n/g, "<br>");
+
+    const dateStr = selectedLetter.created_at
+      ? new Date(selectedLetter.created_at).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })
+      : "";
+
+    printWindow.document.write(`<!DOCTYPE html>
+<html>
+<head>
+  <title>Cover Letter — ${selectedLetter.company_name || "Draft"}</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:wght@700&display=swap');
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    @page { size: letter; margin: 0.75in 1in; }
+    body {
+      font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+      color: #1e293b;
+      font-size: 11pt;
+      line-height: 1.75;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .header {
+      border-bottom: 2px solid #1e293b;
+      padding-bottom: 16px;
+      margin-bottom: 28px;
+    }
+    .header h1 {
+      font-family: 'Merriweather', Georgia, serif;
+      font-size: 20pt;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #0f172a;
+      margin-bottom: 4px;
+    }
+    .header .company {
+      font-size: 10pt;
+      font-weight: 500;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+    }
+    .header .date {
+      font-size: 9pt;
+      color: #94a3b8;
+      margin-top: 6px;
+    }
+    .body p { margin-bottom: 12px; }
+    .body strong { font-weight: 600; }
+    .body em { font-style: italic; }
+    @media print {
+      body { padding: 0; }
+    }
+    @media screen {
+      body { max-width: 700px; margin: 40px auto; padding: 40px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>${selectedLetter.job_title || "Cover Letter"}</h1>
+    <div class="company">${selectedLetter.company_name || ""}</div>
+    ${dateStr ? `<div class="date">${dateStr}</div>` : ""}
+  </div>
+  <div class="body"><p>${htmlContent}</p></div>
+</body>
+</html>`);
+
+    printWindow.document.close();
+    // Wait for fonts to load before printing
+    setTimeout(() => {
+      printWindow.focus();
+      printWindow.print();
+    }, 600);
   };
 
   if (loading) {
@@ -229,25 +338,25 @@ export default function CoverLetterGenerator() {
                           </Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent
-                          className="liquid-glass border-white/10 bg-black/90 backdrop-blur-2xl rounded-3xl"
+                          className="border-white/10 bg-neutral-900/95 backdrop-blur-xl rounded-2xl sm:rounded-2xl max-w-md"
                           onClick={(e) => e.stopPropagation()}
                         >
                           <AlertDialogHeader>
-                            <AlertDialogTitle className="text-xl font-heading italic text-white">
+                            <AlertDialogTitle className="text-lg font-semibold text-white">
                               Delete Cover Letter?
                             </AlertDialogTitle>
-                            <AlertDialogDescription className="text-white/50 font-body font-light">
+                            <AlertDialogDescription className="text-white/50 text-sm leading-relaxed">
                               This action cannot be undone. This will
                               permanently remove your generated cover letter.
                             </AlertDialogDescription>
                           </AlertDialogHeader>
-                          <AlertDialogFooter className="gap-3 mt-8">
-                            <AlertDialogCancel className="rounded-full font-body">
+                          <AlertDialogFooter className="gap-2 mt-6">
+                            <AlertDialogCancel className="rounded-xl bg-white/5 border-white/10 text-white hover:bg-white/10 hover:text-white">
                               Cancel
                             </AlertDialogCancel>
                             <AlertDialogAction
                               onClick={() => handleDelete(letter.id)}
-                              className="bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500 hover:text-white rounded-full font-body transition-all"
+                              className="bg-red-500/15 text-red-400 border border-red-500/20 hover:bg-red-500 hover:text-white rounded-xl transition-all"
                             >
                               Delete
                             </AlertDialogAction>
@@ -361,120 +470,204 @@ export default function CoverLetterGenerator() {
               </CardContent>
             </Card>
           ) : selectedLetter ? (
-            <div className="space-y-6">
-              <div className="flex justify-end gap-2">
-                <Button
-                  variant="glass"
-                  onClick={() => {
-                    navigator.clipboard.writeText(selectedLetter.content);
-                    setCopied(true);
-                    setTimeout(() => setCopied(false), 2000);
-                    toast.success("Copied to clipboard!");
-                  }}
-                  className="rounded-full"
-                >
-                  {copied ? (
-                    <Check className="h-4 w-4 mr-2" />
+            <div className="space-y-5">
+              {/* Action toolbar */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-blue-500/20 to-violet-500/20 border border-white/10 flex items-center justify-center">
+                    <FileText className="h-4 w-4 text-blue-400" />
+                  </div>
+                  <div className="text-left">
+                    <p className="text-sm font-medium text-white">{selectedLetter.job_title}</p>
+                    <p className="text-[11px] text-white/40">{selectedLetter.company_name}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  {isEditing ? (
+                    <>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setIsEditing(false);
+                          setEditContent(selectedLetter.content);
+                        }}
+                        className="h-9 rounded-xl text-white/50 hover:text-white hover:bg-white/5 text-xs px-4"
+                        disabled={savingEdit}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={handleSaveEdit}
+                        className="h-9 rounded-xl bg-blue-500 hover:bg-blue-600 text-white border border-blue-500/50 text-xs px-5 shadow-lg shadow-blue-500/20 transition-all gap-1.5"
+                        disabled={savingEdit}
+                      >
+                        {savingEdit ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
+                        {savingEdit ? "Saving..." : "Save Changes"}
+                      </Button>
+                    </>
                   ) : (
-                    <Copy className="h-4 w-4 mr-2" />
+                    <>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          navigator.clipboard.writeText(selectedLetter.content);
+                          setCopied(true);
+                          setTimeout(() => setCopied(false), 2000);
+                          toast.success("Copied to clipboard!");
+                        }}
+                        className="h-9 rounded-xl text-white/50 hover:text-white hover:bg-white/5 text-xs gap-1.5 px-3"
+                      >
+                        {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                        {copied ? "Copied" : "Copy"}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setEditContent(selectedLetter.content);
+                          setIsEditing(true);
+                        }}
+                        className="h-9 rounded-xl text-white/50 hover:text-white hover:bg-white/5 text-xs gap-1.5 px-3"
+                      >
+                        <PencilLine className="h-3.5 w-3.5" />
+                        Edit
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => navigate("/ai-cover-letter/new")}
+                        className="h-9 rounded-xl text-white/50 hover:text-white hover:bg-white/5 text-xs gap-1.5 px-3"
+                      >
+                        <Plus className="h-3.5 w-3.5" />
+                        New
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={handleDownloadPDF}
+                        className="h-9 rounded-xl bg-white/10 hover:bg-white/15 text-white border border-white/10 text-xs gap-1.5 px-4 transition-all"
+                      >
+                        <Download className="h-3.5 w-3.5" />
+                        PDF
+                      </Button>
+                    </>
                   )}
-                  {copied ? "Copied" : "Copy Text"}
-                </Button>
-                <Button
-                  variant="glass"
-                  onClick={() => navigate("/ai-cover-letter/new")}
-                  className="rounded-full"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Generate Another
-                </Button>
-                <Button
-                  variant="glass-strong"
-                  onClick={handleDownloadPDF}
-                  className="rounded-full"
-                >
-                  <Download className="h-4 w-4 mr-2" />
-                  Download PDF
-                </Button>
+                </div>
               </div>
 
               {selectedLetter._dbSaveFailed && (
-                <div className="rounded-xl border border-yellow-500/30 bg-yellow-500/10 px-4 py-3 text-sm text-yellow-200">
-                  This cover letter was generated but could not be saved to your
-                  library. Copy the text below to keep it.
+                <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-3 text-[13px] text-amber-300/80 flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 shrink-0" />
+                  Generated but not saved — copy the text to keep it.
                 </div>
               )}
 
-              <div className="liquid-glass rounded-3xl border border-white/10 p-4 md:p-6 flex justify-center">
-                <div 
+              {/* Document preview */}
+              <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-3 md:p-5">
+                <div
                   id="cover-letter-preview"
-                  className="bg-white text-slate-900 w-full max-w-[800px] shadow-[0_20px_60px_rgba(0,0,0,0.15)] overflow-hidden relative"
-                  style={{
-                    fontFamily: "'Inter', 'Helvetica Neue', Arial, sans-serif",
-                  }}
+                  className="bg-white rounded-xl overflow-hidden shadow-[0_8px_40px_rgba(0,0,0,0.12)]"
+                  style={{ fontFamily: "'Inter', 'Helvetica Neue', Arial, sans-serif", colorScheme: "light" }}
                 >
-                  {/* Accent stripe at the top */}
-                  <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-slate-900 via-blue-600 to-sky-400 opacity-90" />
-                  
+                  {/* Top accent gradient */}
+                  <div className="h-1 bg-gradient-to-r from-slate-800 via-blue-600 to-indigo-400" />
+
                   {/* Document header */}
-                  <div className="border-b border-slate-200/60 px-10 py-10 sm:px-16 sm:py-12 bg-[#fafafa]">
-                    <div className="flex flex-col sm:flex-row items-start justify-between gap-6">
-                      <div className="space-y-1 text-left">
-                        <h2 className="text-3xl font-bold text-slate-900 tracking-tight uppercase" style={{ fontFamily: "'Merriweather', 'Georgia', serif" }}>
+                  <div className="px-8 pt-10 pb-8 sm:px-12 sm:pt-12 sm:pb-9" style={{ borderBottom: "1px solid #f1f5f9" }}>
+                    <div className="flex flex-col sm:flex-row items-start justify-between gap-5">
+                      <div className="space-y-1.5 text-left">
+                        <h2
+                          className="text-2xl sm:text-[26px] font-bold tracking-tight leading-tight"
+                          style={{ fontFamily: "'Inter', sans-serif", color: "#0f172a" }}
+                        >
                           {selectedLetter.job_title || "Cover Letter"}
                         </h2>
-                        <p className="text-[14px] font-medium text-slate-500 tracking-wide uppercase">
+                        <p style={{ fontSize: "13px", fontWeight: 500, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.05em" }}>
                           {selectedLetter.company_name || ""}
                         </p>
                       </div>
                       {selectedLetter.created_at && (
-                        <div className="text-right">
-                          <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400 mb-1">Date Generated</p>
-                          <span className="text-[12px] font-medium text-slate-600">
-                            {format(new Date(selectedLetter.created_at), "MMMM d, yyyy")}
+                        <div className="text-right shrink-0">
+                          <p style={{ fontSize: "9px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.15em", color: "#cbd5e1", marginBottom: "2px" }}>
+                            Date
+                          </p>
+                          <span style={{ fontSize: "12px", fontWeight: 500, color: "#64748b" }}>
+                            {format(new Date(selectedLetter.created_at), "MMM d, yyyy")}
                           </span>
                         </div>
                       )}
                     </div>
                   </div>
-                  
-                  {/* Letter body */}
-                  <div className="px-10 py-12 sm:px-16 sm:py-14 text-left">
-                    <div
-                      className="whitespace-pre-wrap text-slate-800 text-[14px] leading-[1.8] tracking-[0.01em]"
-                      style={{ 
-                        fontFamily: "'Inter', 'Helvetica Neue', Arial, sans-serif", 
-                        minHeight: "520px" 
-                      }}
-                    >
-                      {selectedLetter.content}
-                    </div>
+
+                  {/* Letter body — rendered markdown or textarea */}
+                  <div className="px-8 py-10 sm:px-12 sm:py-12 text-left">
+                    {isEditing ? (
+                      <textarea
+                        value={editContent}
+                        onChange={(e) => setEditContent(e.target.value)}
+                        className="w-full h-full min-h-[480px] p-4 text-[14px] leading-[1.85] text-slate-700 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 resize-y"
+                        style={{ fontFamily: "'Inter', 'Helvetica Neue', Arial, sans-serif" }}
+                      />
+                    ) : (
+                      <div
+                        style={{
+                          fontFamily: "'Inter', 'Helvetica Neue', Arial, sans-serif",
+                          minHeight: "480px",
+                          color: "#334155",
+                          fontSize: "14px",
+                          lineHeight: "1.85",
+                        }}
+                      >
+                        <Markdown
+                          components={{
+                            p: ({ children }) => <p style={{ marginBottom: "14px", color: "#334155" }}>{children}</p>,
+                            strong: ({ children }) => <strong style={{ color: "#0f172a", fontWeight: 600 }}>{children}</strong>,
+                            em: ({ children }) => <em style={{ color: "#475569" }}>{children}</em>,
+                            h1: ({ children }) => <h1 style={{ fontSize: "20px", fontWeight: 700, color: "#0f172a", marginBottom: "12px", marginTop: "20px" }}>{children}</h1>,
+                            h2: ({ children }) => <h2 style={{ fontSize: "18px", fontWeight: 700, color: "#0f172a", marginBottom: "10px", marginTop: "18px" }}>{children}</h2>,
+                            h3: ({ children }) => <h3 style={{ fontSize: "16px", fontWeight: 600, color: "#1e293b", marginBottom: "8px", marginTop: "16px" }}>{children}</h3>,
+                            hr: () => <hr style={{ border: "none", borderTop: "1px solid #e2e8f0", margin: "20px 0" }} />,
+                            ul: ({ children }) => <ul style={{ paddingLeft: "20px", marginBottom: "14px", color: "#334155", listStyleType: "disc" }}>{children}</ul>,
+                            ol: ({ children }) => <ol style={{ paddingLeft: "20px", marginBottom: "14px", color: "#334155", listStyleType: "decimal" }}>{children}</ol>,
+                            li: ({ children }) => <li style={{ marginBottom: "4px", color: "#334155", display: "list-item" }}>{children}</li>,
+                          }}
+                        >
+                          {selectedLetter.content}
+                        </Markdown>
+                      </div>
+                    )}
                   </div>
-                  
-                  {/* Footer decoration */}
-                  <div className="h-6 bg-[#fafafa] border-t border-slate-100 w-full" />
+
+                  {/* Footer */}
+                  <div style={{ height: "4px", background: "linear-gradient(to right, #f1f5f9, #e2e8f0, #f1f5f9)" }} />
                 </div>
               </div>
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center py-32 space-y-8 liquid-glass rounded-3xl border border-white/5 bg-white/1">
-              <div className="liquid-glass-strong p-8 rounded-full">
-                <Plus className="h-12 w-12 text-white/20" />
+            <div className="flex flex-col items-center justify-center py-28 space-y-8 rounded-2xl border border-white/[0.06] bg-white/[0.015]">
+              <div className="relative">
+                <div className="h-20 w-20 rounded-2xl bg-gradient-to-br from-blue-500/10 to-violet-500/10 border border-white/[0.08] flex items-center justify-center">
+                  <Briefcase className="h-8 w-8 text-white/20" />
+                </div>
+                <div className="absolute -bottom-1 -right-1 h-6 w-6 rounded-lg bg-gradient-to-br from-blue-500/30 to-violet-500/30 border border-white/10 flex items-center justify-center">
+                  <Plus className="h-3 w-3 text-white/60" />
+                </div>
               </div>
-              <div className="text-center space-y-2">
-                <h3 className="text-2xl font-heading italic text-white">
+              <div className="text-center space-y-2 max-w-xs">
+                <h3 className="text-xl font-heading italic text-white">
                   Select a cover letter
                 </h3>
-                <p className="text-white/40 font-body font-light">
-                  Choose one from the sidebar or create a new one to get
-                  started.
+                <p className="text-white/35 font-body font-light text-sm leading-relaxed">
+                  Choose from your library or create a new one tailored to your next role.
                 </p>
               </div>
               <Button
-                variant="glass-strong"
                 onClick={() => navigate("/ai-cover-letter/new")}
-                className="rounded-full px-12"
+                className="h-10 rounded-xl bg-white/10 hover:bg-white/15 text-white border border-white/10 text-sm px-8 transition-all"
               >
+                <Sparkles className="h-4 w-4 mr-2" />
                 Create New Letter
               </Button>
             </div>

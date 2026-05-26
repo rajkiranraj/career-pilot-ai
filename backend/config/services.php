@@ -38,6 +38,7 @@ return [
     'nvidia' => [
         'key' => env('NVIDIA_API_KEY'),
         'model' => env('NVIDIA_MODEL', 'google/gemma-3n-e2b-it'),
+        'fallback_model' => env('NVIDIA_FALLBACK_MODEL', 'meta/llama-3.1-8b-instruct'),
         'base_url' => env('NVIDIA_BASE_URL', 'https://integrate.api.nvidia.com/v1/chat/completions'),
         'system_prompt' => env('NVIDIA_SYSTEM_PROMPT', 'You are a helpful assistant.'),
         'json_system_prompt' => env('NVIDIA_JSON_SYSTEM_PROMPT', 'You are a strict JSON generator. Return only valid JSON.'),

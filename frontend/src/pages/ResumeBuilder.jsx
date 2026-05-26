@@ -25,7 +25,6 @@ import { calculateATSScore } from "../utils/atsScorer";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import LoaderScreen from "../components/LoaderScreen";
-import html2pdf from "html2pdf.js";
 
 // Prompt types mapped to server-side system prompts in the enhance-text edge function:
 // summary | experience | project | skills | achievement | general
@@ -261,10 +260,10 @@ export default function ResumeBuilder() {
     if (Array.isArray(parsed.projects) && parsed.projects.length) {
       setProjects(
         parsed.projects.map((item) => ({
-          name: item.name || "",
-          techStack: item.tech_stack || item.techStack || "",
-          liveUrl: item.live_url || item.liveUrl || "",
-          githubUrl: item.github_url || item.githubUrl || "",
+          name: item.name || item.title || "",
+          techStack: item.techStack || item.tech_stack || "",
+          liveUrl: item.liveUrl || item.live_url || "",
+          githubUrl: item.githubUrl || item.github_url || item.link || "",
           description: item.description || "",
         })),
       );
@@ -718,19 +717,87 @@ export default function ResumeBuilder() {
   };
 
   const generatePDF = () => {
-    const element = document.querySelector(".resume-preview-page");
-    if (!element) {
-      toast.error("Resume preview not found.");
+    const htmlContent = getPrintHTML();
+    if (!htmlContent.trim()) {
+      toast.error("No resume content to export.");
       return;
     }
-    const opt = {
-      margin: 0,
-      filename: `${contact.fullName || 'Resume'}.pdf`,
-      image: { type: 'jpeg', quality: 1 },
-      html2canvas: { scale: 2, useCORS: true },
-      jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-    };
-    html2pdf().set(opt).from(element).save();
+
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) {
+      toast.error("Please allow pop-ups to download your resume.");
+      return;
+    }
+
+    printWindow.document.write(`<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>${contact.fullName || "Resume"}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', 'Calibri', 'Helvetica Neue', Arial, sans-serif;
+      font-size: 11pt;
+      color: #1a1a1a;
+      background: #fff;
+      padding: 0.5in;
+      line-height: 1.55;
+    }
+    h1 {
+      font-size: 22pt;
+      font-weight: 700;
+      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 2pt;
+      color: #111;
+    }
+    h1 + p { text-align: center; font-size: 10pt; color: #444; margin-bottom: 6pt; }
+    h2 {
+      font-size: 11pt;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: #1a1a2e;
+      border-bottom: 1.5px solid #2c3e50;
+      margin-top: 14pt;
+      margin-bottom: 6pt;
+      padding-bottom: 2pt;
+    }
+    h3 {
+      font-size: 11pt;
+      font-weight: 600;
+      margin-bottom: 1pt;
+      color: #222;
+    }
+    p, li {
+      font-size: 10.5pt;
+      margin: 2pt 0;
+      color: #333;
+    }
+    ul { padding-left: 18pt; margin: 2pt 0; }
+    li { margin-bottom: 2pt; }
+    a { color: #0077b5; text-decoration: none; }
+    strong { font-weight: 600; color: #222; }
+    @page { margin: 0.5in; size: letter; }
+    @media print {
+      body { padding: 0; }
+    }
+  </style>
+</head>
+<body>
+  ${htmlContent}
+</body>
+</html>`);
+    printWindow.document.close();
+    
+    // Wait for fonts to load then trigger print
+    setTimeout(() => {
+      printWindow.focus();
+      printWindow.print();
+    }, 600);
   };
 
   const onSubmit = async () => {

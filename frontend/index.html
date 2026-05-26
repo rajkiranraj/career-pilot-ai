@@ -8,7 +8,52 @@
     <title>CareerPilot - AI Career Coach</title>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- Inline pre-loader: visible instantly before React hydrates -->
+      <div id="pre-loader" style="
+        position: fixed; inset: 0; z-index: 9999;
+        display: flex; align-items: center; justify-content: center;
+        background: #000;
+      ">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:18px;">
+          <div style="position:relative;width:56px;height:56px;display:flex;align-items:center;justify-content:center;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
+              fill="rgba(255,255,255,0.9)" stroke="white" stroke-width="0.8"
+              stroke-linecap="round" stroke-linejoin="round"
+              style="filter:drop-shadow(0 0 12px rgba(255,255,255,0.7));animation:pre-pulse .7s ease-in-out infinite alternate">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+              <path d="M13 3l0 7l6 0l-8 11l0 -7l-6 0l8 -11"/>
+            </svg>
+            <div style="position:absolute;inset:0;border-radius:50%;border:2px solid transparent;
+              border-top-color:rgba(255,255,255,.8);border-right-color:rgba(255,255,255,.3);
+              animation:pre-ring .6s linear infinite"></div>
+          </div>
+          <div style="height:3px;width:140px;border-radius:9999px;background:rgba(255,255,255,.08);overflow:hidden">
+            <div style="height:100%;width:40%;border-radius:9999px;
+              background:linear-gradient(90deg,transparent,rgba(255,255,255,.8),transparent);
+              animation:pre-sweep .8s ease-in-out infinite"></div>
+          </div>
+        </div>
+        <style>
+          @keyframes pre-pulse{from{transform:scale(.92);opacity:.7}to{transform:scale(1.08);opacity:1}}
+          @keyframes pre-ring{to{transform:rotate(360deg)}}
+          @keyframes pre-sweep{0%{transform:translateX(-160%)}100%{transform:translateX(320%)}}
+        </style>
+      </div>
+    </div>
+    <script>
+      // Remove pre-loader as soon as React renders
+      const observer = new MutationObserver(() => {
+        const pre = document.getElementById('pre-loader');
+        if (pre && document.getElementById('root').children.length > 1) {
+          pre.style.transition = 'opacity 0.2s';
+          pre.style.opacity = '0';
+          setTimeout(() => pre.remove(), 200);
+          observer.disconnect();
+        }
+      });
+      observer.observe(document.getElementById('root'), { childList: true });
+    </script>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
