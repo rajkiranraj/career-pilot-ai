@@ -750,6 +750,51 @@
   margin-bottom: 20px;
 }
 
+/* ── Search Refreshing Banner ──────────────────────────────── */
+
+.rj-refreshing-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 20px;
+  border-radius: 12px;
+  background: rgba(139, 92, 246, 0.06);
+  border: 1px solid rgba(139, 92, 246, 0.18);
+  color: rgba(196, 181, 253, 0.85);
+  font-family: "Barlow", sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+  animation: rjFadeSlideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.rj-refreshing-icon {
+  flex-shrink: 0;
+  animation: rjSpin 1s linear infinite;
+  color: #a78bfa;
+}
+
+.rj-refreshing-text {
+  transition: opacity 0.3s ease;
+}
+
+@keyframes rjFadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes rjSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 /* ── Responsive ────────────────────────────────────────────── */
 
 @media (max-width: 640px) {

@@ -1,6 +1,7 @@
 import React from "react";
 import { Bookmark, ExternalLink, MapPin, Clock, Banknote, Globe, Building2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { Highlight } from "./ui/perspective-highlight";
 
 const formatJobType = (type) => {
   if (!type) return null;
@@ -116,28 +117,27 @@ const JobCard = ({ job, isSaved, onToggleSave, savingId }) => {
       {/* Tags Row */}
       <div className="jc-card__tags">
         {jobTypeLabel && (
-          <span
-            className="jc-card__tag jc-card__tag--type"
+          <Highlight
+            color="purple"
+            className="jc-card__tag"
             style={{
-              background: typeStyle.bg,
-              color: typeStyle.color,
               borderColor: typeStyle.border,
             }}
           >
             {jobTypeLabel}
-          </span>
+          </Highlight>
         )}
         {isRemote && (
-          <span className="jc-card__tag jc-card__tag--remote">
-            <Globe size={11} />
+          <Highlight color="green" className="jc-card__tag">
+            <Globe size={11} className="inline mr-1" />
             Remote
-          </span>
+          </Highlight>
         )}
         {!isRemote && candidate_required_location && (
-          <span className="jc-card__tag jc-card__tag--location">
-            <Building2 size={11} />
+          <Highlight color="red" className="jc-card__tag">
+            <Building2 size={11} className="inline mr-1" />
             On-site
-          </span>
+          </Highlight>
         )}
       </div>
 

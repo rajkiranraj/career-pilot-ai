@@ -11,6 +11,7 @@ import {
 } from "./ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
 import QuizResult from "./QuizResult";
+import "../styles/interviewPrep.css";
 
 export default function QuizList({ assessments }) {
   const navigate = useNavigate();
@@ -18,7 +19,7 @@ export default function QuizList({ assessments }) {
 
   return (
     <>
-      <Card className="border-white/5">
+      <Card className="border-white/5 bg-white/[0.01]">
         <CardHeader>
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="text-left">
@@ -49,7 +50,8 @@ export default function QuizList({ assessments }) {
               assessments?.map((assessment, i) => (
                 <Card
                   key={assessment.id}
-                  className="cursor-pointer hover:bg-white/[0.02] transition-all border-white/5 hover:border-white/10 group p-2"
+                  className="ip-stat-panel ip-option-enter cursor-pointer transition-all border-white/5 hover:border-white/10 group p-2"
+                  style={{ animationDelay: `${i * 80}ms` }}
                   onClick={() => setSelectedQuiz(assessment)}
                 >
                   <CardHeader className="p-6">
@@ -80,7 +82,7 @@ export default function QuizList({ assessments }) {
       </Card>
 
       <Dialog open={!!selectedQuiz} onOpenChange={() => setSelectedQuiz(null)}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto liquid-glass border-white/10 bg-black/90 backdrop-blur-2xl rounded-3xl p-0">
+        <DialogContent className="ip-dialog-content max-w-3xl max-h-[90vh] overflow-y-auto p-0">
           <DialogHeader className="sr-only">
             <DialogTitle>Quiz Result</DialogTitle>
           </DialogHeader>

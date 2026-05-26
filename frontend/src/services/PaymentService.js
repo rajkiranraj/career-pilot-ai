@@ -1,11 +1,20 @@
+import api, { resolveApiData } from "./api";
+import { isLaravelMode } from "../lib/backendMode";
 import { supabase } from "../lib/supabase";
-import { ensureSupabaseMode } from "./backendGuard";
 
 export const createRazorpayOrder = async (amount, planName, callbackUrl) => {
-  ensureSupabaseMode("Payments");
+  if (isLaravelMode()) {
+    const response = await api.post("/payment/create-order", {
+      amount,
+      planName,
+      callbackUrl,
+    });
+    return resolveApiData(response);
+  }
+
 
   const { data: { session } } = await supabase.auth.getSession();
-  
+
   if (!session?.access_token) {
     throw new Error("User must be logged in to create an order");
   }
@@ -32,7 +41,14 @@ export const createRazorpayOrder = async (amount, planName, callbackUrl) => {
 };
 
 export const verifyRazorpayPayment = async (paymentData, planName) => {
-  ensureSupabaseMode("Payments");
+  if (isLaravelMode()) {
+    const response = await api.post("/payment/verify", {
+      ...paymentData,
+      planName,
+    });
+    return resolveApiData(response);
+  }
+
 
   const { data: { session } } = await supabase.auth.getSession();
 

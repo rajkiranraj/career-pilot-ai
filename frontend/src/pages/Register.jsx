@@ -34,7 +34,7 @@ const Register = () => {
   const { user, checkUser } = useAuth();
   const [signupSuccess, setSignupSuccess] = useState(false);
 
-  // Navigate to onboarding once user is set after signup
+
   useEffect(() => {
     if (signupSuccess && user) {
       navigate("/onboarding");
@@ -53,7 +53,7 @@ const Register = () => {
       const { session } = await signUp({ name, email, password });
 
       if (session) {
-        await checkUser(); // Update auth state
+        await checkUser();
         toast.success("Welcome aboard! You're all set.");
         setSignupSuccess(true); // Trigger navigation via useEffect when user is set
         return;

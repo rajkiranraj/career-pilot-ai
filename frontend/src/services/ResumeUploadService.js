@@ -1,6 +1,7 @@
 import { supabase } from "../lib/supabase";
 import { isLaravelMode } from "../lib/backendMode";
 import api, { resolveApiData } from "./api";
+import { extractTextFromFile } from "../utils/fileParser";
 
 const MAX_TEXT_CHARS = 200_000;
 
@@ -54,3 +55,29 @@ export const parseResumeText = async (resumeText) => {
 
   return { parsed: data?.parsed || null, partial: data?.partial || false };
 };
+
+/**
+ * Parses an uploaded File by first extracting its text client-side,
+ * then sending the extracted text to the resume parsing backend.
+ *
+ * @param {File} file - The uploaded file object
+ * @param {function} onProgress - Progress callback
+ */
+export const parseResumeFile = async (file, onProgress) => {
+  if (!file) {
+    throw new Error("Please select a file first.");
+  }
+
+  const extractedText = await extractTextFromFile(file, onProgress);
+
+  if (!extractedText || !extractedText.trim()) {
+    throw new Error("Could not extract any readable text from the file.");
+  }
+
+  const parseResult = await parseResumeText(extractedText);
+  return {
+    ...parseResult,
+    extractedText,
+  };
+};
+

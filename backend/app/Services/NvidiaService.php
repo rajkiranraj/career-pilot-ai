@@ -65,7 +65,7 @@ class NvidiaService
             throw new \Exception('NVIDIA model is not configured. Please set NVIDIA_MODEL in .env.');
         }
 
-        // Extend PHP execution time for AI calls (NVIDIA NIM can take 30-60s per attempt)
+
         if (!app()->runningInConsole()) {
             set_time_limit(240);
         }
@@ -81,7 +81,7 @@ class NvidiaService
 
         for ($attempt = 1; $attempt <= $attempts; $attempt++) {
             try {
-                // If it is a subsequent attempt, try using fallback model
+
                 if ($attempt > 1 && !empty($this->fallbackModel)) {
                     $currentModel = $this->fallbackModel;
                     Log::warning("NVIDIA API attempt {$attempt}: Falling back to model {$currentModel}");
@@ -125,7 +125,7 @@ class NvidiaService
                 }
             }
 
-            // Sleep 1 second before retrying
+
             usleep(1000000);
         }
 

@@ -147,11 +147,11 @@ export default function QuizResult({
           {result.questions?.map((q, index) => (
             <details
               key={index}
-              className="group rounded-2xl bg-white/[0.03] border border-white/[0.06] hover:border-white/[0.1] transition-all duration-300 overflow-hidden"
+              className={`ip-review-details group ${q.isCorrect ? "ip-indicator-correct" : "ip-indicator-incorrect"}`}
             >
-              <summary className="flex items-center gap-4 p-5 cursor-pointer select-none list-none [&::-webkit-details-marker]:hidden">
+              <summary className="ip-review-summary select-none">
                 {/* Question number */}
-                <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-white/[0.06] flex items-center justify-center">
+                <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-white/[0.06] flex items-center justify-center mr-4">
                   <span className="text-xs text-white/40 font-body font-medium tabular-nums">
                     {String(index + 1).padStart(2, "0")}
                   </span>
@@ -164,18 +164,18 @@ export default function QuizResult({
 
                 {/* Result icon */}
                 {q.isCorrect ? (
-                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center">
+                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center mr-4">
                     <CheckCircle2 className="h-4 w-4 text-emerald-400" />
                   </div>
                 ) : (
-                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-red-500/10 flex items-center justify-center">
+                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-red-500/10 flex items-center justify-center mr-4">
                     <XCircle className="h-4 w-4 text-red-400" />
                   </div>
                 )}
 
-                {/* Expand indicator */}
+                {/* Expand indicator chevron */}
                 <svg
-                  className="w-4 h-4 text-white/20 group-open:rotate-180 transition-transform duration-300 flex-shrink-0"
+                  className="ip-review-summary-icon w-4 h-4 text-white/20 transition-transform duration-300 flex-shrink-0"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -186,8 +186,8 @@ export default function QuizResult({
               </summary>
 
               {/* Expanded content */}
-              <div className="px-5 pb-5 pt-1 space-y-4 border-t border-white/[0.04]">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
+              <div className="ip-review-content space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
                   <div className="space-y-1.5 text-left">
                     <p className="text-[10px] uppercase tracking-[0.2em] text-white/30 font-body">
                       Your Answer

@@ -105,7 +105,7 @@ const Onboarding = () => {
               .filter(Boolean)
           : [];
 
-      // Remove subIndustry from the payload so Supabase doesn't complain about a missing column
+      // Omit virtual field before payload submission
       const { subIndustry, ...restValues } = values;
 
       const response = await updateUser({

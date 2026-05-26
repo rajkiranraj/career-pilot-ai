@@ -9,8 +9,15 @@ import {
 } from "../services/RemoteJobsService";
 import JobCard from "../components/JobCard";
 import { Badge } from "../components/ui/badge";
-import { BriefcaseIcon, Search, Globe, Building2, LayoutGrid } from "lucide-react";
+import { BriefcaseIcon, Search, Globe, Building2, LayoutGrid, RefreshCw } from "lucide-react";
+import { Perspective } from "../components/ui/perspective-highlight";
 import "../styles/remoteJobs.css";
+
+const SEARCH_STAGES = [
+  "Scanning job listings...",
+  "Filtering opportunities...",
+  "Preparing your results...",
+];
 
 const SKELETON_COUNT = 6;
 
@@ -51,6 +58,8 @@ const RemoteJobs = () => {
   const [filteredJobs, setFilteredJobs] = useState([]);
   const [savedJobIds, setSavedJobIds] = useState(new Set());
   const [loading, setLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [searchStageIdx, setSearchStageIdx] = useState(0);
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
@@ -58,17 +67,18 @@ const RemoteJobs = () => {
   const [savingId, setSavingId] = useState(null);
   const [jobTypeFilter, setJobTypeFilter] = useState("all");
 
-  // Debounce ref
+  // Refs
   const debounceRef = useRef(null);
+  const stageRef = useRef(null);
 
-  // Load categories on mount
+
   useEffect(() => {
     fetchJobCategories()
       .then((cats) => setCategories(cats))
       .catch(() => {});
   }, []);
 
-  // Load saved jobs on mount
+
   useEffect(() => {
     getSavedJobs()
       .then((saved) => {
@@ -100,11 +110,21 @@ const RemoteJobs = () => {
     setFilteredJobs(filtered);
   }, [jobs, jobTypeFilter]);
 
-  // Fetch jobs (debounced)
+
   const loadJobs = useCallback(
-    async (searchTerm, cat) => {
+    async (searchTerm, cat, isInitial = false) => {
       try {
-        setLoading(true);
+        if (isInitial) {
+          setLoading(true);
+        } else {
+          setIsRefreshing(true);
+          setSearchStageIdx(0);
+          // Cycle through search stage messages
+          if (stageRef.current) clearInterval(stageRef.current);
+          stageRef.current = setInterval(() => {
+            setSearchStageIdx((i) => (i + 1) % SEARCH_STAGES.length);
+          }, 900);
+        }
         setError("");
 
         const params = {
@@ -120,6 +140,11 @@ const RemoteJobs = () => {
         setError("Unable to fetch jobs right now. Please try again later.");
       } finally {
         setLoading(false);
+        setIsRefreshing(false);
+        if (stageRef.current) {
+          clearInterval(stageRef.current);
+          stageRef.current = null;
+        }
       }
     },
     [],
@@ -127,7 +152,7 @@ const RemoteJobs = () => {
 
   // Initial load
   useEffect(() => {
-    loadJobs("", "");
+    loadJobs("", "", true);
   }, [loadJobs]);
 
   // Debounced search
@@ -137,17 +162,17 @@ const RemoteJobs = () => {
 
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
-      loadJobs(value, category);
+      loadJobs(value, category, false);
     }, 500);
   };
 
   const handleCategoryChange = (e) => {
     const value = e.target.value;
     setCategory(value);
-    loadJobs(search, value);
+    loadJobs(search, value, false);
   };
 
-  // Toggle save
+
   const handleToggleSave = async (job) => {
     if (savingId) return;
     setSavingId(job.id);
@@ -195,19 +220,19 @@ const RemoteJobs = () => {
           </p>
         </div>
         {!loading && filteredJobs.length > 0 && (
-          <div className="jb-header__stats">
+          <div className="jb-header__stats liquid-glass-strong border border-white/10 rounded-2xl shadow-xl shadow-black/20">
             <div className="jb-stat">
-              <span className="jb-stat__number">{jobs.length}</span>
+              <span className="jb-stat__number text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">{jobs.length}</span>
               <span className="jb-stat__label">Total Jobs</span>
             </div>
             <div className="jb-stat__divider" />
             <div className="jb-stat">
-              <span className="jb-stat__number">{remoteCount}</span>
+              <span className="jb-stat__number text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-400">{remoteCount}</span>
               <span className="jb-stat__label">Remote</span>
             </div>
             <div className="jb-stat__divider" />
             <div className="jb-stat">
-              <span className="jb-stat__number">{onsiteCount}</span>
+              <span className="jb-stat__number text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-amber-400">{onsiteCount}</span>
               <span className="jb-stat__label">On-site</span>
             </div>
           </div>
@@ -233,7 +258,7 @@ const RemoteJobs = () => {
       </div>
 
       {/* Filters */}
-      <div className="rj-filters">
+      <div className="rj-filters bg-white/[0.02] border border-white/[0.05] p-3 rounded-2xl backdrop-blur-xl shadow-lg shadow-black/10">
         <div style={{ position: "relative", flex: 1, minWidth: 200 }}>
           <Search
             size={16}
@@ -287,6 +312,14 @@ const RemoteJobs = () => {
         </div>
       )}
 
+      {/* Search Refreshing Banner */}
+      {isRefreshing && (
+        <div className="rj-refreshing-banner">
+          <RefreshCw size={13} className="rj-refreshing-icon" />
+          <span className="rj-refreshing-text">{SEARCH_STAGES[searchStageIdx]}</span>
+        </div>
+      )}
+
       {/* Loading Skeletons */}
       {loading && (
         <div className="rj-grid">
@@ -300,9 +333,10 @@ const RemoteJobs = () => {
       {!loading && !error && filteredJobs.length > 0 && (
         <div className="rj-grid">
           {filteredJobs.map((job, index) => (
-            <div
+            <Perspective
               key={job.id}
-              className="jc-card-wrapper animate-element"
+              className="jc-card-wrapper animate-element w-full h-full"
+              cardClassName="p-0 max-w-none w-full h-full"
               style={{ animationDelay: `${Math.min(index * 50, 400)}ms` }}
             >
               <JobCard
@@ -311,7 +345,7 @@ const RemoteJobs = () => {
                 onToggleSave={handleToggleSave}
                 savingId={savingId}
               />
-            </div>
+            </Perspective>
           ))}
         </div>
       )}

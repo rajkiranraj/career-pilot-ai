@@ -39,6 +39,67 @@ import { format } from "date-fns";
 import LoaderScreen from "../components/LoaderScreen";
 import { LoadingBreadcrumb } from "../components/ui/animated-loading-svg-text-shimmer";
 import Markdown from "react-markdown";
+import "../styles/coverLetter.css";
+
+const LOADING_STAGES = [
+  "Analyzing job requirements...",
+  "Scanning candidate profile...",
+  "Extracting key matching achievements...",
+  "Formulating tone & persuasive structure...",
+  "Drafting initial letter copy...",
+  "Polishing grammar and vocabulary...",
+  "Finalizing document format..."
+];
+
+function CoverLetterLoadingCard() {
+  const [stageIdx, setStageIdx] = useState(0);
+  const [fadeState, setFadeState] = useState("stage-visible");
+
+  useEffect(() => {
+    const stageInterval = setInterval(() => {
+      setFadeState("stage-hidden");
+      setTimeout(() => {
+        setStageIdx((prev) => (prev + 1) % LOADING_STAGES.length);
+        setFadeState("stage-visible");
+      }, 400);
+    }, 1800);
+
+    return () => clearInterval(stageInterval);
+  }, []);
+
+  const progressPercent = Math.round(((stageIdx + 1) / LOADING_STAGES.length) * 100);
+
+  return (
+    <div className="cl-loading-card">
+      <div className="cl-loading-glow" />
+      <div className="cl-loading-orb-wrap">
+        <div className="cl-loading-orb">
+          <Sparkles className="h-8 w-8 text-white" />
+        </div>
+      </div>
+      <div className="cl-loading-badge">
+        <Loader2 className="h-3.5 w-3.5" />
+        <span>AI Engine Active</span>
+      </div>
+      <div className="cl-loading-stage-container">
+        <div className={`cl-loading-stage ${fadeState === "stage-visible" ? "cl-stage-visible" : "cl-stage-hidden"}`}>
+          {LOADING_STAGES[stageIdx]}
+        </div>
+      </div>
+      <div className="cl-loading-progress-container">
+        <div className="cl-loading-progress-bar">
+          <div className="cl-loading-progress-fill" style={{ width: `${progressPercent}%` }} />
+        </div>
+        <div className="cl-loading-progress-text">
+          Phase {stageIdx + 1} of {LOADING_STAGES.length}
+        </div>
+      </div>
+      <p className="cl-loading-hint">
+        Crafting a perfect cover letter takes about 10-15 seconds. Please don't close this page.
+      </p>
+    </div>
+  );
+}
 
 export default function CoverLetterGenerator() {
   const { user, loading: authLoading } = useAuth();
@@ -180,7 +241,7 @@ export default function CoverLetterGenerator() {
     }
 
     const content = selectedLetter.content || "";
-    // Convert markdown-style formatting to simple HTML for the print view
+    // Simple MD-to-HTML transform for print preview
     const htmlContent = content
       .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
       .replace(/\*(.*?)\*/g, "<em>$1</em>")
@@ -307,10 +368,11 @@ export default function CoverLetterGenerator() {
             </Card>
           ) : (
             <div className="space-y-4">
-              {coverLetters.map((letter) => (
+              {coverLetters.map((letter, index) => (
                 <Card
                   key={letter.id}
-                  className={`cursor-pointer transition-all border-white/5 hover:bg-white/2 group ${id === String(letter.id) ? "border-white/20 bg-white/3" : ""}`}
+                  className={`cl-sidebar-card cl-sidebar-item cursor-pointer group ${id === String(letter.id) ? "cl-active" : ""}`}
+                  style={{ animationDelay: `${index * 80}ms` }}
                   onClick={() => navigate(`/ai-cover-letter/${letter.id}`)}
                 >
                   <CardHeader className="p-6">
@@ -373,13 +435,15 @@ export default function CoverLetterGenerator() {
 
         {/* Main Content: Form or Preview */}
         <div className="lg:col-span-2">
-          {id === "new" ? (
-            <Card className="border-white/5 bg-white/2 p-2">
+          {generating ? (
+            <CoverLetterLoadingCard />
+          ) : id === "new" ? (
+            <Card className="cl-form-card border-white/5 bg-white/2 p-2">
               <CardHeader className="p-8">
                 <CardTitle className="text-2xl font-heading italic text-white">
                   Job Details
                 </CardTitle>
-                <CardDescription className="text-white/40 font-body">
+                <CardDescription className="text-white/40 font-body font-light">
                   Provide information about the position you're applying for
                 </CardDescription>
               </CardHeader>
@@ -389,17 +453,18 @@ export default function CoverLetterGenerator() {
                     <div className="space-y-2 text-left">
                       <Label
                         htmlFor="companyName"
-                        className="text-white/50 uppercase tracking-widest text-[10px] ml-4"
+                        className="text-white/50 uppercase tracking-widest text-[10px] ml-4 font-body"
                       >
                         Company Name
                       </Label>
                       <Input
                         id="companyName"
+                        className="cl-input"
                         placeholder="e.g. Flipkart"
                         {...register("companyName")}
                       />
                       {errors.companyName && (
-                        <p className="text-sm text-red-500 ml-4">
+                        <p className="text-sm text-red-500 ml-4 font-body">
                           {errors.companyName.message}
                         </p>
                       )}
@@ -408,17 +473,18 @@ export default function CoverLetterGenerator() {
                     <div className="space-y-2 text-left">
                       <Label
                         htmlFor="jobTitle"
-                        className="text-white/50 uppercase tracking-widest text-[10px] ml-4"
+                        className="text-white/50 uppercase tracking-widest text-[10px] ml-4 font-body"
                       >
                         Job Title
                       </Label>
                       <Input
                         id="jobTitle"
+                        className="cl-input"
                         placeholder="e.g. SDE II"
                         {...register("jobTitle")}
                       />
                       {errors.jobTitle && (
-                        <p className="text-sm text-red-500 ml-4">
+                        <p className="text-sm text-red-500 ml-4 font-body">
                           {errors.jobTitle.message}
                         </p>
                       )}
@@ -428,18 +494,18 @@ export default function CoverLetterGenerator() {
                   <div className="space-y-2 text-left">
                     <Label
                       htmlFor="jobDescription"
-                      className="text-white/50 uppercase tracking-widest text-[10px] ml-4"
+                      className="text-white/50 uppercase tracking-widest text-[10px] ml-4 font-body"
                     >
                       Job Description (Paste here)
                     </Label>
                     <Textarea
                       id="jobDescription"
                       placeholder="Paste the job description from the listing..."
-                      className="min-h-50"
+                      className="cl-textarea min-h-50"
                       {...register("jobDescription")}
                     />
                     {errors.jobDescription && (
-                      <p className="text-sm text-red-500 ml-4">
+                      <p className="text-sm text-red-500 ml-4 font-body">
                         {errors.jobDescription.message}
                       </p>
                     )}
@@ -453,18 +519,14 @@ export default function CoverLetterGenerator() {
                     >
                       Cancel
                     </Button>
-                    <Button
+                    <button
                       type="submit"
-                      variant="glass-strong"
                       disabled={generating}
-                      className="rounded-full px-8"
+                      className="cl-btn-generate"
                     >
-                      {generating ? (
-                        <LoadingBreadcrumb text="Cooking" className="text-xs" white />
-                      ) : (
-                        "Generate Cover Letter"
-                      )}
-                    </Button>
+                      <span>Generate Cover Letter</span>
+                      <Sparkles className="cl-btn-generate-arrow h-4 w-4" />
+                    </button>
                   </div>
                 </form>
               </CardContent>

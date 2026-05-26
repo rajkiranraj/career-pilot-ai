@@ -1,5 +1,9 @@
 import axios from "axios";
 
+/**
+ * Resolves the backend API base URL, normalizing localhost aliases
+ * (127.0.0.1 ↔ localhost) so the browser doesn't treat them as cross-origin.
+ */
 const resolveApiBaseUrl = () => {
   const configured = import.meta.env.VITE_API_URL;
 
@@ -23,7 +27,7 @@ const resolveApiBaseUrl = () => {
       return url.toString().replace(/\/$/, "");
     }
   } catch {
-    // Ignore invalid configured URL and fall back to raw value below.
+    // fall through to raw value
   }
 
   return configured;
@@ -56,7 +60,7 @@ const api = axios.create({
   },
 });
 
-// Interceptor to automatically add /api prefix to non-auth routes
+/** Prefix non-auth requests with /api so callers don't repeat it. */
 api.interceptors.request.use((config) => {
   const authRoutes = [
     "/login",
@@ -80,7 +84,7 @@ api.interceptors.response.use(
   (response) => response.data,
   (error) => {
     if (error.response?.status === 401) {
-      // Handle unauthorized
+      window.location.href = '/login';
     }
     return Promise.reject(error.response?.data || error.message);
   },

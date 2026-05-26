@@ -2,6 +2,7 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import { analyzeATS } from "../services/ATSAnalyzerService";
 import { Button } from "../components/ui/button";
 import { LoadingBreadcrumb } from "../components/ui/animated-loading-svg-text-shimmer";
+import { extractTextFromFile } from "../utils/fileParser";
 import "../styles/atsAnalyzer.css";
 
 /* ── SVG Icons ─────────────────────────────────────────── */
@@ -126,29 +127,25 @@ const ATSAnalyzer = () => {
   const [uploadedFile, setUploadedFile] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [processingStep, setProcessingStep] = useState(""); // SaaS step status
   const [resumeMode, setResumeMode] = useState("drop"); // "drop" | "paste" | "uploaded"
   const dragCounterRef = useRef(0);
   const fileInputRef = useRef(null);
   const dropZoneRef = useRef(null);
 
   /* ── File handling ───────────────────────────────────── */
-  const readFileAsText = useCallback((file) => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = (e) => resolve(e.target.result);
-      reader.onerror = () => reject(new Error("Failed to read file"));
-      reader.readAsText(file);
-    });
-  }, []);
-
   const processFile = useCallback(async (file) => {
     const ext = "." + file.name.split(".").pop().toLowerCase();
-    if (!ACCEPTED_EXTENSIONS.includes(ext)) {
-      setError("Unsupported file type. Please upload .txt, .pdf, .doc, or .docx files.");
+    
+    // Accept standard formats including .docx and .rtf
+    const acceptedExtensions = [".txt", ".pdf", ".docx", ".rtf"];
+    if (!acceptedExtensions.includes(ext)) {
+      setError("Unsupported file format. Please upload a .pdf, .docx, .rtf, or .txt file.");
       return;
     }
-    if (file.size > 5 * 1024 * 1024) {
-      setError("File too large. Maximum size is 5MB.");
+    
+    if (file.size > 10 * 1024 * 1024) {
+      setError("File exceeds the 10MB size limit.");
       return;
     }
 
@@ -156,51 +153,44 @@ const ATSAnalyzer = () => {
     setIsProcessing(true);
     setUploadedFile({ name: file.name, size: file.size, type: ext });
     setUploadProgress(0);
-
-    // Simulate upload progress
-    const progressInterval = setInterval(() => {
-      setUploadProgress((prev) => {
-        if (prev >= 90) {
-          clearInterval(progressInterval);
-          return 90;
-        }
-        return prev + Math.random() * 15 + 5;
-      });
-    }, 120);
+    setProcessingStep("Reading document structure...");
 
     try {
-      if (ext === ".txt") {
-        const text = await readFileAsText(file);
-        setResumeText(text);
-      } else {
-        // For PDF/DOC/DOCX, read as text (best effort) or inform user
-        try {
-          const text = await readFileAsText(file);
-          if (text && text.trim().length > 20) {
-            setResumeText(text);
-          } else {
-            setResumeText("");
-            setError(`File parsed — for best results with ${ext} files, paste your resume text directly.`);
-          }
-        } catch {
-          setResumeText("");
-          setError(`Could not extract text from ${ext} file. Please paste your resume text instead.`);
+      // Perform 100% in-browser text extraction
+      const text = await extractTextFromFile(file, (progress) => {
+        setUploadProgress(Math.round(progress));
+        if (progress < 30) {
+          setProcessingStep("Reading file data...");
+        } else if (progress < 65) {
+          setProcessingStep("Extracting textual content...");
+        } else if (progress < 90) {
+          setProcessingStep("Cleaning tags and layouts...");
+        } else {
+          setProcessingStep("Formatting complete!");
         }
+      });
+
+      if (!text || text.trim().length < 40) {
+        throw new Error("Could not extract readable text. Please ensure the file is not a scanned image or empty.");
       }
-      clearInterval(progressInterval);
+
+      setResumeText(text);
       setUploadProgress(100);
+      setProcessingStep("Success!");
+      
       setTimeout(() => {
         setIsProcessing(false);
         setResumeMode("uploaded");
       }, 500);
     } catch (err) {
-      clearInterval(progressInterval);
+      console.error("Text extraction failed:", err);
       setIsProcessing(false);
       setUploadProgress(0);
       setUploadedFile(null);
-      setError("Failed to process file. Please try again.");
+      setProcessingStep("");
+      setError(err.message || "Failed to parse document. Please paste the text directly.");
     }
-  }, [readFileAsText]);
+  }, []);
 
   /* ── Drag event handlers ─────────────────────────────── */
   const handleDragEnter = useCallback((e) => {
@@ -275,7 +265,29 @@ const ATSAnalyzer = () => {
 
     try {
       const data = await analyzeATS(resumeText, jobDescription);
-      setResult(data);
+      if (data) {
+        // Defensive normalization to support both local Laravel (score, matchedKeywords) and Supabase schemas
+        const normalized = {
+          overallScore: Number(data.overallScore ?? data.score ?? 0),
+          sectionScores: data.sectionScores ?? {
+            "Skills Match": Number(data.score ?? 70),
+            "Experience Match": Number(data.score ?? 70),
+            "Keyword Match": data.matchedKeywords?.length 
+              ? Math.round((data.matchedKeywords.length / ((data.matchedKeywords.length + (data.missingKeywords?.length || 0)) || 1)) * 100) 
+              : Number(data.score ?? 70),
+          },
+          keywordMatch: data.keywordMatch ?? {
+            found: data.matchedKeywords ?? [],
+            missing: data.missingKeywords ?? []
+          },
+          strengths: data.strengths ?? [],
+          improvements: data.improvements ?? data.weaknesses ?? (data.suggestions ? data.suggestions.map(s => s.message) : []),
+          tailoredSummary: data.tailoredSummary ?? (data.suggestions ? data.suggestions.map(s => s.message).join(". ") : "")
+        };
+        setResult(normalized);
+      } else {
+        setResult(null);
+      }
     } catch (err) {
       setError(err.message || "Analysis failed. Please try again.");
     } finally {
@@ -418,7 +430,10 @@ const ATSAnalyzer = () => {
                     style={{ width: `${Math.min(uploadProgress, 100)}%` }}
                   />
                 </div>
-                <span className="ats-processing-percent">{Math.round(Math.min(uploadProgress, 100))}%</span>
+                <div className="ats-processing-status-row">
+                  <span className="ats-processing-step">{processingStep}</span>
+                  <span className="ats-processing-percent">{Math.round(Math.min(uploadProgress, 100))}%</span>
+                </div>
               </div>
             </div>
           )}
@@ -433,7 +448,7 @@ const ATSAnalyzer = () => {
                 <div className="ats-uploaded-info">
                   <span className="ats-uploaded-name">{uploadedFile.name}</span>
                   <span className="ats-uploaded-meta">
-                    {formatFileSize(uploadedFile.size)} • {resumeText.length.toLocaleString()} characters extracted
+                    {formatFileSize(uploadedFile.size)} • {resumeText.split(/\s+/).filter(Boolean).length} words • {resumeText.length.toLocaleString()} characters extracted
                   </span>
                 </div>
                 <button className="ats-uploaded-remove" onClick={handleRemoveFile} title="Remove file">
@@ -442,9 +457,12 @@ const ATSAnalyzer = () => {
               </div>
               {resumeText && (
                 <div className="ats-uploaded-preview">
-                  <div className="ats-uploaded-preview-label">Extracted Text Preview</div>
+                  <div className="ats-uploaded-preview-header">
+                    <span className="ats-uploaded-preview-label">Extracted Text Preview</span>
+                    <span className="ats-uploaded-preview-badge">Verified Plaintext</span>
+                  </div>
                   <div className="ats-uploaded-preview-text">
-                    {resumeText.slice(0, 300)}{resumeText.length > 300 ? "..." : ""}
+                    {resumeText.slice(0, 600)}{resumeText.length > 600 ? "..." : ""}
                   </div>
                 </div>
               )}

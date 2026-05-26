@@ -10,7 +10,7 @@ const ProfileSettings = () => {
   const [opacity, setOpacity] = useState(0.21);
   const [activeTab, setActiveTab] = useState("account");
 
-  // Load initial value from localStorage
+
   useEffect(() => {
     const savedOpacity = localStorage.getItem("glass-opacity");
     if (savedOpacity) {

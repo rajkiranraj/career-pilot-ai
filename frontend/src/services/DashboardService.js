@@ -8,7 +8,7 @@ export const getIndustryInsights = async () => {
     return { success: true, data: resolveApiData(response) };
   }
 
-  // First, get the user's industry from their profile
+
   const {
     data: { session },
   } = await supabase.auth.getSession();
@@ -22,7 +22,7 @@ export const getIndustryInsights = async () => {
 
   if (!profile?.industry) return { success: true, data: null };
 
-  // Try to get cached insights for this industry
+
   const { data: cachedInsight } = await supabase
     .from('industry_insights')
     .select('*')
@@ -33,13 +33,13 @@ export const getIndustryInsights = async () => {
     return { success: true, data: cachedInsight };
   }
 
-  // No cached insights — generate them via Edge Function
+  // No cache hit — generate fresh via edge function
   try {
     const { data, error } = await supabase.functions.invoke('generate-insights');
 
     if (error) {
       console.error('Edge Function error:', error);
-      // If the edge function fails, show a friendly message instead of crashing
+
       throw new Error(
         typeof error === 'object' && error.message 
           ? error.message 

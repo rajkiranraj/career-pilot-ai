@@ -87,7 +87,7 @@ const DashboardView = ({ insights, userLocation }) => {
   const OutlookIcon = outlookInfo.icon;
   const outlookColor = outlookInfo.color;
 
-  // Format dates using date-fns
+
   const lastUpdatedDate = normalizedInsights.updated_at
     ? format(new Date(normalizedInsights.updated_at), "dd/MM/yyyy")
     : "N/A";

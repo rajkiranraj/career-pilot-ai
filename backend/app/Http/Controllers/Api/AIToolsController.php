@@ -150,12 +150,15 @@ Return a JSON object with this structure:
 
 Only include fields that need improvement. Use null for fields that are already good.";
 
-        $result = $this->nvidia->generateJson($prompt, [
-            'max_tokens' => 4096,
-            'temperature' => 0.2,
-        ]);
-
-        return $this->success(['ats_fix' => $result]);
+        try {
+            $result = $this->nvidia->generateJson($prompt, [
+                'max_tokens' => 4096,
+                'temperature' => 0.2,
+            ]);
+            return $this->success(['ats_fix' => $result]);
+        } catch (\Exception $e) {
+            return $this->error('Failed to generate ATS fix: ' . $e->getMessage(), null, 500);
+        }
     }
 
     /**
@@ -182,20 +185,25 @@ JOB DESCRIPTION:
 {$request->jobDescription}
 \"\"\"
 
-Return a JSON object with:
-{
-  \"score\": 75,
-  \"matchedKeywords\": [\"keyword1\", \"keyword2\"],
-  \"missingKeywords\": [\"keyword3\", \"keyword4\"],
-  \"suggestions\": [
-    {\"category\": \"Skills\", \"message\": \"Add X skill\", \"priority\": \"high\"},
-    {\"category\": \"Experience\", \"message\": \"Quantify Y\", \"priority\": \"medium\"}
-  ],
-  \"strengths\": [\"Good use of action verbs\", \"Relevant experience\"],
-  \"weaknesses\": [\"Missing key skills\", \"No quantified achievements\"]
-}
+            Return ONLY a valid JSON object in exactly this format:
+            {
+              \"overallScore\": 75,
+              \"sectionScores\": {
+                \"skills\": 80,
+                \"experience\": 75,
+                \"education\": 90,
+                \"keywords\": 72
+              },
+              \"keywordMatch\": {
+                \"found\": [\"keyword1\", \"keyword2\"],
+                \"missing\": [\"keyword3\", \"keyword4\"]
+              },
+              \"strengths\": [\"Good use of action verbs\", \"Relevant experience\"],
+              \"improvements\": [\"Missing key skills\", \"No quantified achievements\"],
+              \"tailoredSummary\": \"A concise, tailored professional summary.\"
+            }
 
-Be thorough and specific. Score from 0-100.";
+            Be thorough and specific. Score from 0-100.";
 
             $result = $this->nvidia->generateJson($prompt, [
                 'max_tokens' => 4096,

@@ -49,4 +49,10 @@ return [
         'presence_penalty' => env('NVIDIA_PRESENCE_PENALTY', 0.0),
     ],
 
+    'razorpay' => [
+        'key_id' => env('RAZORPAY_KEY_ID'),
+        'key_secret' => env('RAZORPAY_KEY_SECRET'),
+    ],
+
 ];
+

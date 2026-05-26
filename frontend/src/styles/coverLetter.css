@@ -1,0 +1,364 @@
+/* ==========================================================================
+   AI Cover Letter Generator CSS
+   Premium SaaS Design & Animations (Purple Accent Palette)
+   ========================================================================== */
+
+/* ── Custom Properties ── */
+:root {
+  --cl-purple: rgba(139, 92, 246, 1);
+  --cl-purple-glow: rgba(139, 92, 246, 0.15);
+  --cl-purple-glow-strong: rgba(139, 92, 246, 0.35);
+  --cl-glass-bg: rgba(255, 255, 255, 0.02);
+  --cl-glass-bg-hover: rgba(255, 255, 255, 0.04);
+  --cl-glass-bg-active: rgba(255, 255, 255, 0.06);
+  --cl-border: rgba(255, 255, 255, 0.06);
+  --cl-border-hover: rgba(255, 255, 255, 0.12);
+  --cl-border-focus: rgba(139, 92, 246, 0.5);
+}
+
+/* ── Container & Layout Animations ── */
+.cl-container {
+  animation: clFadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes clFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Sidebar & Navigation List ── */
+.cl-sidebar-card {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1px solid var(--cl-border);
+  background: var(--cl-glass-bg);
+}
+
+.cl-sidebar-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--cl-border-hover);
+  background: var(--cl-glass-bg-hover);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+}
+
+.cl-sidebar-card.cl-active {
+  border-color: rgba(139, 92, 246, 0.3);
+  background: rgba(139, 92, 246, 0.04);
+  box-shadow: 0 0 25px rgba(139, 92, 246, 0.08);
+}
+
+/* Sidebar entry transition */
+.cl-sidebar-item {
+  opacity: 0;
+  transform: translateY(10px);
+  animation: clSlideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes clSlideUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Form and Fields Polishing */
+.cl-form-card {
+  border: 1px solid var(--cl-border);
+  background: rgba(255, 255, 255, 0.015);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.cl-input-group {
+  position: relative;
+}
+
+.cl-input, .cl-textarea {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.2) !important;
+  border: 1px solid var(--cl-border) !important;
+  border-radius: 12px !important;
+  color: #fff !important;
+  font-family: 'Barlow', sans-serif !important;
+  font-size: 14px !important;
+  padding: 12px 16px !important;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.cl-input:focus, .cl-textarea:focus {
+  border-color: var(--cl-border-focus) !important;
+  box-shadow: 0 0 0 3px var(--cl-purple-glow) !important;
+  outline: none !important;
+  background: rgba(0, 0, 0, 0.4) !important;
+}
+
+.cl-textarea {
+  resize: vertical;
+  min-height: 180px;
+  line-height: 1.6;
+}
+
+/* ── Premium Loading Screen ── */
+.cl-loading-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 40px;
+  border-radius: 24px;
+  border: 1px solid var(--cl-border);
+  background: rgba(255, 255, 255, 0.01);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  position: relative;
+  overflow: hidden;
+  animation: clFadeIn 0.5s ease-out;
+  min-height: 520px;
+}
+
+.cl-loading-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.08) 0%, rgba(139, 92, 246, 0) 70%);
+  filter: blur(20px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.cl-loading-orb-wrap {
+  position: relative;
+  margin-bottom: 40px;
+  z-index: 1;
+}
+
+.cl-loading-orb {
+  position: relative;
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.15) 0%, rgba(139, 92, 246, 0.4) 60%, rgba(139, 92, 246, 0.8) 100%);
+  box-shadow: 
+    0 0 35px var(--cl-purple-glow-strong),
+    inset 0 2px 4px rgba(255, 255, 255, 0.4);
+  animation: clOrbPulse 2.4s cubic-bezier(0.445, 0.05, 0.55, 0.95) infinite;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cl-loading-orb svg {
+  color: #fff;
+  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.8));
+  animation: clOrbFloat 3s ease-in-out infinite;
+}
+
+@keyframes clOrbPulse {
+  0%, 100% {
+    transform: scale(0.96);
+    box-shadow: 0 0 25px rgba(139, 92, 246, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.3);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 50px rgba(139, 92, 246, 0.7), inset 0 2px 6px rgba(255, 255, 255, 0.5);
+  }
+}
+
+@keyframes clOrbFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+.cl-loading-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  border-radius: 20px;
+  background: rgba(139, 92, 246, 0.1);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: #c4b5fd;
+  margin-bottom: 24px;
+  z-index: 1;
+}
+
+.cl-loading-badge svg {
+  animation: clSpin 2.5s linear infinite;
+}
+
+@keyframes clSpin {
+  100% { transform: rotate(360deg); }
+}
+
+/* Crossfade transitions for rotating text */
+.cl-loading-stage-container {
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 30px;
+  z-index: 1;
+  width: 100%;
+}
+
+.cl-loading-stage {
+  font-family: 'Instrument Serif', serif;
+  font-style: italic;
+  font-size: 26px;
+  color: #fff;
+  text-align: center;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  width: 100%;
+  position: absolute;
+}
+
+.cl-stage-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  filter: blur(0);
+}
+
+.cl-stage-hidden {
+  opacity: 0;
+  transform: translateY(-8px) scale(0.96);
+  filter: blur(4px);
+}
+
+/* Loading progress bar */
+.cl-loading-progress-container {
+  width: 200px;
+  z-index: 1;
+  text-align: center;
+}
+
+.cl-loading-progress-bar {
+  height: 4px;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: 12px;
+  position: relative;
+}
+
+.cl-loading-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #8b5cf6, #a78bfa);
+  border-radius: 999px;
+  box-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
+  transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.cl-loading-progress-text {
+  font-family: 'Barlow', sans-serif;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.35);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.cl-loading-hint {
+  font-family: 'Barlow', sans-serif;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.4);
+  max-width: 260px;
+  text-align: center;
+  margin-top: 24px;
+  font-style: italic;
+  z-index: 1;
+}
+
+/* ── Custom Generate Button with Arrow Nudge ── */
+.cl-btn-generate {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 9999px;
+  padding: 14px 28px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.cl-btn-generate:hover {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+  box-shadow: 
+    0 8px 25px rgba(0, 0, 0, 0.3),
+    0 0 20px rgba(139, 92, 246, 0.2);
+}
+
+.cl-btn-generate:active {
+  transform: translateY(1px);
+}
+
+.cl-btn-generate::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.15),
+    transparent
+  );
+  transition: 0.5s;
+}
+
+.cl-btn-generate:hover::before {
+  left: 100%;
+  transition: 0.8s ease-in-out;
+}
+
+.cl-btn-generate-arrow {
+  margin-left: 8px;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.cl-btn-generate:hover .cl-btn-generate-arrow {
+  transform: translateX(4px);
+}
+
+/* ── PDF Action Buttons ── */
+.cl-action-btn {
+  transition: all 0.2s ease;
+}
+
+.cl-action-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+}
+
+.cl-action-btn-primary {
+  background: #fff !important;
+  color: #000 !important;
+}
+
+.cl-action-btn-primary:hover {
+  background: rgba(255, 255, 255, 0.9) !important;
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+}

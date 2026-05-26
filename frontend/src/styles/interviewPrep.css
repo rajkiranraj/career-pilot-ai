@@ -1,0 +1,438 @@
+/* ==========================================================================
+   Interview Prep & Mock Quizzes CSS
+   Premium SaaS Design & Animations (Purple Accent Palette)
+   ========================================================================== */
+
+/* ── Custom Properties ── */
+:root {
+  --ip-purple: rgba(139, 92, 246, 1);
+  --ip-purple-glow: rgba(139, 92, 246, 0.15);
+  --ip-purple-glow-strong: rgba(139, 92, 246, 0.35);
+  --ip-glass-bg: rgba(255, 255, 255, 0.02);
+  --ip-glass-bg-hover: rgba(255, 255, 255, 0.04);
+  --ip-border: rgba(255, 255, 255, 0.06);
+  --ip-border-hover: rgba(255, 255, 255, 0.12);
+  --ip-border-focus: rgba(139, 92, 246, 0.5);
+}
+
+/* ── Container entrance ── */
+.ip-container {
+  animation: ipFadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes ipFadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Premium Option Card ── */
+.ip-option-card {
+  width: 100%;
+  text-align: left;
+  border-radius: 16px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.015);
+  border: 1px solid var(--ip-border);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ip-option-card:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.15);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+}
+
+.ip-option-card.ip-selected {
+  background: rgba(139, 92, 246, 0.08);
+  border-color: rgba(139, 92, 246, 0.4);
+  box-shadow: 
+    0 8px 30px rgba(139, 92, 246, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.ip-option-card:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Staggered option entry */
+.ip-option-enter {
+  opacity: 0;
+  transform: translateY(15px);
+  animation: ipOptionSlideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes ipOptionSlideUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.ip-option-index {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: all 0.3s ease;
+}
+
+.ip-option-card:hover:not(:disabled) .ip-option-index {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.8);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.ip-option-card.ip-selected .ip-option-index {
+  background: #fff;
+  color: #000;
+  border-color: #fff;
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+}
+
+/* Selection dot indicators */
+.ip-option-dot {
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ip-option-card:hover:not(:disabled) .ip-option-dot {
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.ip-option-card.ip-selected .ip-option-dot {
+  border-color: #8b5cf6;
+  background: #8b5cf6;
+}
+
+.ip-option-card.ip-selected .ip-option-dot::after {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #fff;
+}
+
+/* ── Question Slide Transitions ── */
+.ip-question-wrap {
+  position: relative;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ip-question-enter {
+  animation: ipQuestionSlideIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes ipQuestionSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ── Interactive Review Details Accordions ── */
+.ip-review-details {
+  background: rgba(255, 255, 255, 0.015);
+  border: 1px solid var(--ip-border);
+  border-radius: 16px;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+
+.ip-review-details:hover {
+  border-color: var(--ip-border-hover);
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.ip-review-details[open] {
+  border-color: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.02);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.ip-review-summary {
+  display: flex;
+  align-items: center;
+  padding: 18px 24px;
+  cursor: pointer;
+  user-select: none;
+  list-style: none;
+}
+
+.ip-review-summary::-webkit-details-marker {
+  display: none;
+}
+
+.ip-review-summary-icon {
+  margin-left: auto;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.ip-review-details[open] .ip-review-summary-icon {
+  transform: rotate(180deg);
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.ip-review-content {
+  padding: 20px 24px 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  animation: ipSlideDown 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes ipSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Correct / Incorrect Indicators */
+.ip-indicator-correct {
+  border-color: rgba(52, 211, 153, 0.2) !important;
+  background: rgba(52, 211, 153, 0.02) !important;
+}
+
+.ip-indicator-correct:hover {
+  border-color: rgba(52, 211, 153, 0.3) !important;
+}
+
+.ip-indicator-incorrect {
+  border-color: rgba(248, 113, 113, 0.2) !important;
+  background: rgba(248, 113, 113, 0.02) !important;
+}
+
+.ip-indicator-incorrect:hover {
+  border-color: rgba(248, 113, 113, 0.3) !important;
+}
+
+/* ── Quiz Loading Component ── */
+.ip-loading-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 40px;
+  border-radius: 24px;
+  border: 1px solid var(--ip-border);
+  background: rgba(255, 255, 255, 0.015);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  position: relative;
+  overflow: hidden;
+  animation: ipFadeIn 0.5s ease-out;
+  min-height: 500px;
+}
+
+.ip-loading-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 320px;
+  height: 320px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, rgba(139, 92, 246, 0) 70%);
+  filter: blur(24px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.ip-loading-orb-wrap {
+  position: relative;
+  margin-bottom: 40px;
+  z-index: 1;
+}
+
+.ip-loading-orb {
+  position: relative;
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.15) 0%, rgba(139, 92, 246, 0.4) 65%, rgba(139, 92, 246, 0.85) 100%);
+  box-shadow: 
+    0 0 35px var(--ip-purple-glow-strong),
+    inset 0 2px 4px rgba(255, 255, 255, 0.4);
+  animation: ipOrbPulse 2.4s cubic-bezier(0.445, 0.05, 0.55, 0.95) infinite;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ip-loading-orb svg {
+  color: #fff;
+  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.8));
+  animation: ipOrbFloat 3s ease-in-out infinite;
+}
+
+@keyframes ipOrbPulse {
+  0%, 100% {
+    transform: scale(0.96);
+    box-shadow: 0 0 25px rgba(139, 92, 246, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.3);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 50px rgba(139, 92, 246, 0.7), inset 0 2px 6px rgba(255, 255, 255, 0.5);
+  }
+}
+
+@keyframes ipOrbFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+.ip-loading-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  border-radius: 20px;
+  background: rgba(139, 92, 246, 0.1);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: #c4b5fd;
+  margin-bottom: 24px;
+  z-index: 1;
+}
+
+.ip-loading-badge svg {
+  animation: ipSpin 2.5s linear infinite;
+}
+
+@keyframes ipSpin {
+  100% { transform: rotate(360deg); }
+}
+
+.ip-loading-stage-container {
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 30px;
+  z-index: 1;
+  width: 100%;
+}
+
+.ip-loading-stage {
+  font-family: 'Instrument Serif', serif;
+  font-style: italic;
+  font-size: 26px;
+  color: #fff;
+  text-align: center;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  width: 100%;
+  position: absolute;
+}
+
+.ip-stage-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  filter: blur(0);
+}
+
+.ip-stage-hidden {
+  opacity: 0;
+  transform: translateY(-8px) scale(0.96);
+  filter: blur(4px);
+}
+
+.ip-loading-progress-container {
+  width: 200px;
+  z-index: 1;
+  text-align: center;
+}
+
+.ip-loading-progress-bar {
+  height: 4px;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: 12px;
+  position: relative;
+}
+
+.ip-loading-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #8b5cf6, #a78bfa);
+  border-radius: 999px;
+  box-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
+  transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ip-loading-progress-text {
+  font-family: 'Barlow', sans-serif;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.35);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.ip-loading-hint {
+  font-family: 'Barlow', sans-serif;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.4);
+  max-width: 260px;
+  text-align: center;
+  margin-top: 24px;
+  font-style: italic;
+  z-index: 1;
+}
+
+/* ── Premium Wide Dialog Dashboard Structure ── */
+.ip-dialog-content {
+  border-radius: 24px !important;
+  background: rgba(10, 10, 10, 0.95) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.7) !important;
+  backdrop-filter: blur(40px) !important;
+  -webkit-backdrop-filter: blur(40px) !important;
+  max-width: 860px !important;
+}
+
+/* ── Stats Panels ── */
+.ip-stat-panel {
+  border: 1px solid var(--ip-border);
+  background: var(--ip-glass-bg);
+  transition: all 0.3s ease;
+}
+
+.ip-stat-panel:hover {
+  border-color: var(--ip-border-hover);
+  background: var(--ip-glass-bg-hover);
+  transform: translateY(-1px);
+}

@@ -16,7 +16,6 @@ export const enhanceText = async (text, type = "general") => {
   if (isLaravelMode()) {
     const response = await api.post("/enhance-text", { text, type });
     const data = resolveApiData(response);
-    // data may come back as a string instead of parsed object
     const parsed = typeof data === "string" ? JSON.parse(data) : data;
     return parsed;
   }
@@ -38,7 +37,10 @@ export const enhanceText = async (text, type = "general") => {
     throw new Error(msg);
   }
 
-  // data may come back as a string instead of parsed object
-  const parsed = typeof data === "string" ? JSON.parse(data) : data;
-  return parsed;
+  try {
+    const parsed = typeof data === "string" ? JSON.parse(data) : data;
+    return parsed;
+  } catch {
+    throw new Error("AI returned a malformed response. Please retry.");
+  }
 };

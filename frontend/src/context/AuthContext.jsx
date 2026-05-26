@@ -19,14 +19,14 @@ export const AuthProvider = ({ children }) => {
   const fetchingRef = useRef(false);
   const useLaravel = isLaravelMode();
 
-  // Fetches the profile and merges it with the auth user
+  /** Merges Supabase auth user with the profiles table row. */
   const fetchUserProfile = useCallback(async (authUser) => {
     if (!authUser) {
       setUser(null);
       return;
     }
 
-    // Prevent overlapping fetches (the main cause of the glitch)
+    // Guard: prevent overlapping fetches (causes state flicker)
     if (fetchingRef.current) return;
     fetchingRef.current = true;
 
@@ -42,7 +42,7 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (error) {
       console.error("Profile fetch error:", error);
-      // Still set the auth user even if profile fetch fails (new users may not have a profile yet)
+      // Profile may not exist yet for newly-registered users
       if (isMounted.current) {
         setUser(authUser);
       }
@@ -51,7 +51,7 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
-  // Public method pages can call to refresh user data
+  /** Re-fetches and sets the current user (call after login/signup). */
   const checkUser = useCallback(async () => {
     if (useLaravel) {
       try {
@@ -84,7 +84,7 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     isMounted.current = true;
 
-    // 1. Get the initial session
+    // --- Bootstrap session on mount ---
     const initAuth = async () => {
       if (useLaravel) {
         try {
@@ -121,12 +121,12 @@ export const AuthProvider = ({ children }) => {
 
     initAuth();
 
-    // 2. Listen for auth state changes (login, logout, token refresh)
+    // --- Subscribe to auth changes (Supabase only) ---
     if (!useLaravel) {
       const {
         data: { subscription },
       } = supabase.auth.onAuthStateChange((event, session) => {
-        // Only react to meaningful auth events, skip token refreshes to avoid loops
+        // Skip TOKEN_REFRESHED — reacting to it causes infinite loops
         if (
           event === "SIGNED_IN" ||
           event === "SIGNED_OUT" ||

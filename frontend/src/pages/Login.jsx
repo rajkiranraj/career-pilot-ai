@@ -34,7 +34,6 @@ const Login = () => {
   const { user, checkUser } = useAuth();
   const [loginSuccess, setLoginSuccess] = useState(false);
 
-  // Navigate to dashboard once user is set after login
   useEffect(() => {
     if (loginSuccess && user) {
       navigate("/dashboard");
@@ -63,7 +62,7 @@ const Login = () => {
     try {
       await signIn({ email, password });
 
-      await checkUser(); // Update auth state
+      await checkUser();
       toast.success("Welcome back!");
       setLoginSuccess(true); // Trigger navigation via useEffect when user is set
     } catch (error) {

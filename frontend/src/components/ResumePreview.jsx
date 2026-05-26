@@ -57,7 +57,7 @@ export default function ResumePreview({ contact, summary, skills, experiences, e
   const hasPublications = publications.some(p => p.title?.trim());
   const hasVolunteer = volunteerWork.some(v => v.org?.trim());
 
-  // Build contact info items
+
   const contactItems = [];
   if (contact.email?.trim()) contactItems.push({ text: contact.email, href: `mailto:${contact.email}` });
   if (contact.mobile?.trim()) contactItems.push({ text: contact.mobile });

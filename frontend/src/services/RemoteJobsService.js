@@ -2,7 +2,10 @@ import api from "./api";
 import { isLaravelMode } from "../lib/backendMode";
 import { supabase } from "../lib/supabase";
 
-// ── In-memory cache (15-min TTL) ──────────────────────────────
+/**
+ * Remote job listings — proxies through Laravel or calls Remotive API directly.
+ * Results are cached in-memory with a 15-minute TTL.
+ */
 const CACHE_TTL_MS = 15 * 60 * 1000;
 const cache = new Map();
 
@@ -22,7 +25,7 @@ const setCache = (key, data) => {
   cache.set(key, { data, timestamp: Date.now() });
 };
 
-// ── Fetch remote jobs ─────────────────────────────────────────
+
 export const fetchRemoteJobs = async ({
   category = "",
   search = "",
@@ -34,7 +37,7 @@ export const fetchRemoteJobs = async ({
   if (cached) return cached;
 
   if (isLaravelMode()) {
-    // Proxy through Laravel backend
+
     const queryParams = new URLSearchParams();
     if (category) queryParams.append("category", category);
     if (search) queryParams.append("search", search);
@@ -47,7 +50,7 @@ export const fetchRemoteJobs = async ({
     return jobs;
   }
 
-  // Supabase mode — call Remotive API directly
+
   const queryParams = new URLSearchParams();
   if (category) queryParams.append("category", category);
   if (search) queryParams.append("search", search);
@@ -66,7 +69,7 @@ export const fetchRemoteJobs = async ({
   return jobs;
 };
 
-// ── Fetch job categories ──────────────────────────────────────
+
 let categoriesCache = null;
 
 export const fetchJobCategories = async () => {
@@ -84,7 +87,6 @@ export const fetchJobCategories = async () => {
   return categories;
 };
 
-// ── Get saved jobs ────────────────────────────────────────────
 export const getSavedJobs = async () => {
   if (isLaravelMode()) {
     const response = await api.get("/remote-jobs/saved");
@@ -110,7 +112,6 @@ export const getSavedJobs = async () => {
   return data || [];
 };
 
-// ── Save a job ────────────────────────────────────────────────
 export const saveJob = async (job) => {
   const payload = {
     remotive_job_id: job.id,
@@ -144,7 +145,6 @@ export const saveJob = async (job) => {
   return data;
 };
 
-// ── Unsave a job ──────────────────────────────────────────────
 export const unsaveJob = async (remotiveJobId) => {
   if (isLaravelMode()) {
     await api.delete(`/remote-jobs/saved/${remotiveJobId}`);

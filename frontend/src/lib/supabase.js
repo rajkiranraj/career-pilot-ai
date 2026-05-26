@@ -16,7 +16,13 @@ export const getAuthRedirectUrl = () => {
   return "";
 };
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.warn(
+    "Supabase credentials missing. Ensure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are set in your environment.",
+  );
+}
+
+export const supabase = createClient(supabaseUrl || "http://localhost", supabaseAnonKey || "dummy", {
   auth: {
     autoRefreshToken: true,
     persistSession: true,

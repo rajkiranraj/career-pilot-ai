@@ -25,6 +25,65 @@ import QuizResult from "../components/QuizResult";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import LoaderScreen from "../components/LoaderScreen";
+import "../styles/interviewPrep.css";
+
+const LOADING_STAGES = [
+  "Analyzing career goals and skills...",
+  "Sourcing technical question database...",
+  "Generating custom situational scenarios...",
+  "Validating answers and explanations...",
+  "Finalizing personalized assessment..."
+];
+
+function QuizLoadingCard() {
+  const [stageIdx, setStageIdx] = useState(0);
+  const [fadeState, setFadeState] = useState("stage-visible");
+
+  useEffect(() => {
+    const stageInterval = setInterval(() => {
+      setFadeState("stage-hidden");
+      setTimeout(() => {
+        setStageIdx((prev) => (prev + 1) % LOADING_STAGES.length);
+        setFadeState("stage-visible");
+      }, 400);
+    }, 1800);
+
+    return () => clearInterval(stageInterval);
+  }, []);
+
+  const progressPercent = Math.round(((stageIdx + 1) / LOADING_STAGES.length) * 100);
+
+  return (
+    <div className="ip-loading-card max-w-2xl mx-auto my-12">
+      <div className="ip-loading-glow" />
+      <div className="ip-loading-orb-wrap">
+        <div className="ip-loading-orb">
+          <Sparkles className="h-8 w-8 text-white" />
+        </div>
+      </div>
+      <div className="ip-loading-badge">
+        <Loader2 className="h-3.5 w-3.5" />
+        <span>AI Engine Active</span>
+      </div>
+      <div className="ip-loading-stage-container">
+        <div className={`ip-loading-stage ${fadeState === "stage-visible" ? "ip-stage-visible" : "ip-stage-hidden"}`}>
+          {LOADING_STAGES[stageIdx]}
+        </div>
+      </div>
+      <div className="ip-loading-progress-container">
+        <div className="ip-loading-progress-bar">
+          <div className="ip-loading-progress-fill" style={{ width: `${progressPercent}%` }} />
+        </div>
+        <div className="ip-loading-progress-text">
+          Phase {stageIdx + 1} of {LOADING_STAGES.length}
+        </div>
+      </div>
+      <p className="ip-loading-hint">
+        Sourcing and generating custom technical questions based on your career profile.
+      </p>
+    </div>
+  );
+}
 
 /* ─── Animated circular progress ring ─── */
 function ScoreRing({ score, size = 160, strokeWidth = 8 }) {
@@ -126,57 +185,18 @@ function OptionCard({ option, index, isSelected, onSelect, disabled }) {
     <button
       onClick={() => onSelect(option)}
       disabled={disabled}
-      className={`
-        group relative w-full text-left rounded-2xl p-5 transition-all duration-300 ease-out
-        border backdrop-blur-sm cursor-pointer
-        ${
-          isSelected
-            ? "bg-white/[0.12] border-white/30 shadow-[0_0_30px_rgba(255,255,255,0.08)]"
-            : "bg-white/[0.03] border-white/[0.07] hover:bg-white/[0.07] hover:border-white/[0.15]"
-        }
-        ${disabled ? "opacity-50 pointer-events-none" : ""}
-        quiz-option-enter
-      `}
+      className={`ip-option-card ip-option-enter ${isSelected ? "ip-selected" : ""} ${disabled ? "opacity-50" : ""}`}
       style={{ animationDelay: `${index * 80 + 200}ms` }}
     >
       <div className="flex items-start gap-4">
-        <div
-          className={`
-            flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center text-sm font-medium font-body
-            transition-all duration-300
-            ${
-              isSelected
-                ? "bg-white text-black shadow-[0_0_20px_rgba(255,255,255,0.3)]"
-                : "bg-white/[0.08] text-white/50 group-hover:bg-white/[0.12] group-hover:text-white/70"
-            }
-          `}
-        >
+        <div className="ip-option-index">
           {labels[index]}
         </div>
-        <span
-          className={`
-            text-[15px] font-body font-light leading-relaxed pt-1.5
-            transition-colors duration-300
-            ${isSelected ? "text-white" : "text-white/70 group-hover:text-white/90"}
-          `}
-        >
+        <span className="text-[15px] font-body font-light leading-relaxed pt-1.5 text-white/70 group-hover:text-white/90">
           {option}
         </span>
       </div>
-      {/* Selection indicator dot */}
-      <div
-        className={`
-          absolute right-5 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full border-2 transition-all duration-300
-          flex items-center justify-center
-          ${isSelected ? "border-white bg-white" : "border-white/20 group-hover:border-white/40"}
-        `}
-      >
-        {isSelected && (
-          <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
-            <path d="M1 4L3.5 6.5L9 1" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        )}
-      </div>
+      <div className="ip-option-dot" />
     </button>
   );
 }
@@ -315,7 +335,11 @@ export default function InterviewPrep() {
   }
 
   if (loading) {
-    return <LoaderScreen label="Generating your personalized quiz..." />;
+    return (
+      <div className="container mx-auto py-12">
+        <QuizLoadingCard />
+      </div>
+    );
   }
 
   // ─── Quiz Mode ────────────────────────────────────────────────────

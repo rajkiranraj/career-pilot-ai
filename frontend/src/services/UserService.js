@@ -41,7 +41,7 @@ export const updateUser = async (updateData) => {
     }
   }
 
-  // Cast experience to integer if present
+
   if (sanitized.experience !== undefined) {
     sanitized.experience = parseInt(sanitized.experience, 10) || 0;
   }
