@@ -1,6 +1,5 @@
 import { ArrowUpRight, Zap, Palette, BarChart3, Shield } from "lucide-react";
 import { Link } from "react-router-dom";
-import { CardBody, CardContainer, CardItem } from "./ui/3d-card";
 import { useAuth } from "../context/AuthContext";
 import ScrollFloat from "./ui/ScrollFloat";
 
@@ -84,22 +83,22 @@ export const FeaturesChess = () => {
 export const FeaturesGrid = () => {
   const cards = [
     {
-      icon: <Zap className="w-5 h-5 text-white" />,
+      icon: <Zap className="w-5 h-5 text-black" />,
       title: "Fast-Track Success",
       body: "Accelerate your career with tools that work at the speed of thought. Because your future can't wait.",
     },
     {
-      icon: <Palette className="w-5 h-5 text-white" />,
+      icon: <Palette className="w-5 h-5 text-black" />,
       title: "Expertly Guided",
       body: "Every resume bullet and interview answer refined by AI mentors. Design your career with absolute precision.",
     },
     {
-      icon: <BarChart3 className="w-5 h-5 text-white" />,
+      icon: <BarChart3 className="w-5 h-5 text-black" />,
       title: "Built for Impact",
       body: "Strategies informed by real-world market data. Decisions backed by analytics. Results you can measure.",
     },
     {
-      icon: <Shield className="w-5 h-5 text-white" />,
+      icon: <Shield className="w-5 h-5 text-black" />,
       title: "Personalized for You",
       body: "Tailored career coaching that understands your unique goals. Professional advancement that feels inevitable.",
     },
@@ -122,32 +121,22 @@ export const FeaturesGrid = () => {
       {/* Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
         {cards.map((card, i) => (
-          <CardContainer key={i} className="inter-var">
-            <CardBody className="liquid-glass relative group/card border-white/10 w-auto h-auto rounded-[2rem] md:rounded-3xl p-8 md:p-10 border flex flex-col gap-8 md:gap-10 hover:bg-white/[0.02] transition-colors group">
-              <CardItem
-                translateZ="50"
-                className="liquid-glass-strong rounded-full w-12 h-12 md:w-14 md:h-14 flex items-center justify-center group-hover:scale-110 transition-transform"
-              >
-                {card.icon}
-              </CardItem>
-              <div className="flex flex-col gap-4 md:gap-6 text-left">
-                <CardItem
-                  translateZ="60"
-                  as="h3"
-                  className="text-xl md:text-2xl font-heading italic text-white leading-none"
-                >
-                  {card.title}
-                </CardItem>
-                <CardItem
-                  translateZ="80"
-                  as="p"
-                  className="text-white/50 font-body font-light text-sm md:text-base leading-relaxed"
-                >
-                  {card.body}
-                </CardItem>
-              </div>
-            </CardBody>
-          </CardContainer>
+          <div
+            key={i}
+            className="liquid-glass relative border border-white/10 rounded-[2rem] md:rounded-3xl p-8 md:p-10 flex flex-col gap-8 md:gap-10 hover:bg-white/[0.04] hover:-translate-y-2 transition-all duration-500 ease-out group"
+          >
+            <div className="bg-white rounded-full w-12 h-12 md:w-14 md:h-14 flex items-center justify-center group-hover:scale-110 transition-transform duration-500 ease-out shadow-[0_0_20px_rgba(255,255,255,0.15)]">
+              {card.icon}
+            </div>
+            <div className="flex flex-col gap-4 md:gap-6 text-left">
+              <h3 className="text-xl md:text-2xl font-heading italic text-white leading-none">
+                {card.title}
+              </h3>
+              <p className="text-white/50 font-body font-light text-sm md:text-base leading-relaxed group-hover:text-white/70 transition-colors duration-500">
+                {card.body}
+              </p>
+            </div>
+          </div>
         ))}
       </div>
     </section>

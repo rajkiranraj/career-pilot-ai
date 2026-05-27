@@ -5,6 +5,7 @@ import { DiaTextReveal } from "./ui/dia-text-reveal";
 import { TubesBackground } from "./ui/TubesBackground";
 import { ShinyButton } from "./ui/shiny-button";
 import { SparklesCore } from "./ui/sparkles";
+import PixelLogoGrid from "./ui/pixel-logo-grid";
 
 export const Hero = () => {
   return (
@@ -91,23 +92,17 @@ export const Hero = () => {
         </motion.div>
 
         {/* Partners Bar */}
-        <div className="mt-auto pb-8 pt-24 md:pt-32 w-full flex flex-col items-center">
-          <div className="liquid-glass rounded-full px-4 md:px-6 py-2 mb-8 text-[10px] md:text-xs text-white/50 uppercase tracking-[0.2em] font-body text-center">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.6, duration: 1.5, ease: "easeInOut" }}
+          className="mt-auto pb-8 pt-20 md:pt-28 w-full flex flex-col items-center"
+        >
+          <p className="text-[10px] md:text-xs text-white/30 uppercase tracking-[0.25em] font-body mb-6">
             Placing talent at the teams behind
-          </div>
-          <div className="flex flex-wrap justify-center gap-8 md:gap-16">
-            {["Stripe", "Vercel", "Linear", "Notion", "Figma"].map(
-              (partner) => (
-                <span
-                  key={partner}
-                  className="text-xl md:text-3xl font-heading italic text-white/40 hover:text-white transition-smooth-colors cursor-default"
-                >
-                  {partner}
-                </span>
-              ),
-            )}
-          </div>
-        </div>
+          </p>
+          <PixelLogoGrid className="w-full max-w-5xl" />
+        </motion.div>
       </div>
     </section>
   );
