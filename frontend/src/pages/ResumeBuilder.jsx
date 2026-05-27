@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Download, Loader2, Save } from "lucide-react";
 import { toast } from "sonner";
-import { LoadingBreadcrumb } from "../components/ui/animated-loading-svg-text-shimmer";
+import { AILoader } from "../components/ui/ai-loader";
 import ResumePreview from "../components/ResumePreview";
 import ATSScoreChecker from "../components/ATSScoreChecker";
 import { Button } from "../components/ui/button";
@@ -907,7 +907,7 @@ export default function ResumeBuilder() {
                     disabled={improvingResume}
                   >
                     {improvingResume ? (
-                      <LoadingBreadcrumb text="Cooking" className="text-sm" white />
+                      <AILoader text="Cooking" size="sm" />
                     ) : (
                       "Improve with AI"
                     )}
@@ -921,7 +921,7 @@ export default function ResumeBuilder() {
                     style={parsingResume ? { opacity: 1 } : {}}
                   >
                     {parsingResume ? (
-                      <LoadingBreadcrumb text="Cooking" className="text-sm" dark />
+                      <AILoader text="Cooking" size="sm" />
                     ) : (
                       "Parse Resume"
                     )}

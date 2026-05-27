@@ -38,68 +38,9 @@ import { useAuth } from "../context/AuthContext";
 import { format } from "date-fns";
 import LoaderScreen from "../components/LoaderScreen";
 import { LoadingBreadcrumb } from "../components/ui/animated-loading-svg-text-shimmer";
+import { AILoader } from "../components/ui/ai-loader";
 import Markdown from "react-markdown";
 import "../styles/coverLetter.css";
-
-const LOADING_STAGES = [
-  "Analyzing job requirements...",
-  "Scanning candidate profile...",
-  "Extracting key matching achievements...",
-  "Formulating tone & persuasive structure...",
-  "Drafting initial letter copy...",
-  "Polishing grammar and vocabulary...",
-  "Finalizing document format..."
-];
-
-function CoverLetterLoadingCard() {
-  const [stageIdx, setStageIdx] = useState(0);
-  const [fadeState, setFadeState] = useState("stage-visible");
-
-  useEffect(() => {
-    const stageInterval = setInterval(() => {
-      setFadeState("stage-hidden");
-      setTimeout(() => {
-        setStageIdx((prev) => (prev + 1) % LOADING_STAGES.length);
-        setFadeState("stage-visible");
-      }, 400);
-    }, 1800);
-
-    return () => clearInterval(stageInterval);
-  }, []);
-
-  const progressPercent = Math.round(((stageIdx + 1) / LOADING_STAGES.length) * 100);
-
-  return (
-    <div className="cl-loading-card">
-      <div className="cl-loading-glow" />
-      <div className="cl-loading-orb-wrap">
-        <div className="cl-loading-orb">
-          <Sparkles className="h-8 w-8 text-white" />
-        </div>
-      </div>
-      <div className="cl-loading-badge">
-        <Loader2 className="h-3.5 w-3.5" />
-        <span>AI Engine Active</span>
-      </div>
-      <div className="cl-loading-stage-container">
-        <div className={`cl-loading-stage ${fadeState === "stage-visible" ? "cl-stage-visible" : "cl-stage-hidden"}`}>
-          {LOADING_STAGES[stageIdx]}
-        </div>
-      </div>
-      <div className="cl-loading-progress-container">
-        <div className="cl-loading-progress-bar">
-          <div className="cl-loading-progress-fill" style={{ width: `${progressPercent}%` }} />
-        </div>
-        <div className="cl-loading-progress-text">
-          Phase {stageIdx + 1} of {LOADING_STAGES.length}
-        </div>
-      </div>
-      <p className="cl-loading-hint">
-        Crafting a perfect cover letter takes about 10-15 seconds. Please don't close this page.
-      </p>
-    </div>
-  );
-}
 
 export default function CoverLetterGenerator() {
   const { user, loading: authLoading } = useAuth();
@@ -433,10 +374,9 @@ export default function CoverLetterGenerator() {
           )}
         </div>
 
-        {/* Main Content: Form or Preview */}
         <div className="lg:col-span-2">
           {generating ? (
-            <CoverLetterLoadingCard />
+            <AILoader text="Generating" className="py-24" />
           ) : id === "new" ? (
             <Card className="cl-form-card border-white/5 bg-white/2 p-2">
               <CardHeader className="p-8">

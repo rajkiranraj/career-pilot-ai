@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { LoaderThree } from "@/components/ui/loader";
+import { AILoader } from "@/components/ui/ai-loader";
 
 const LoaderScreen = ({ label = "Loading...", overlay = false }) => {
   const [fadeOut, setFadeOut] = useState(false);
@@ -15,11 +15,7 @@ const LoaderScreen = ({ label = "Loading...", overlay = false }) => {
       }`}
     >
       <div className="flex flex-col items-center gap-5 text-center">
-        <LoaderThree />
-        <p className="loader-label">{label}</p>
-        <div className="loader-track">
-          <div className="loader-track-bar" />
-        </div>
+        <AILoader text={label} />
       </div>
     </div>
   );

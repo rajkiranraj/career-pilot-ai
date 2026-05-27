@@ -18,49 +18,6 @@ const ROLE_TIMELINE_OPTIONS = TIMELINE_PRESETS.map((p) => ({
 }));
 const JD_TIMELINE_OPTIONS = ROLE_TIMELINE_OPTIONS;
 
-const LOADING_STAGES = [
-  { icon: Brain, text: "Analyzing your career trajectory...", color: "#c4b5fd" },
-  { icon: Target, text: "Mapping skill gaps & opportunities...", color: "#93c5fd" },
-  { icon: BookOpen, text: "Curating personalized resources...", color: "#6ee7b7" },
-  { icon: Zap, text: "Building your phase roadmap...", color: "#fcd34d" },
-  { icon: Sparkles, text: "Finalizing your career blueprint...", color: "#f472b6" },
-];
-
-/* ── Rotating loading state UI ───────────────────────────────── */
-const RoadmapLoadingCard = ({ isJDMode }) => {
-  const [stageIdx, setStageIdx] = useState(0);
-  const [visible, setVisible] = useState(true);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setVisible(false);
-      setTimeout(() => {
-        setStageIdx((i) => (i + 1) % LOADING_STAGES.length);
-        setVisible(true);
-      }, 300);
-    }, 1900);
-    return () => clearInterval(interval);
-  }, []);
-
-  const stage = LOADING_STAGES[stageIdx];
-
-  return (
-    <>
-      <AILoader size={180} text={isJDMode ? "Processing" : "Generating"} />
-      <div className="fixed inset-0 z-[60] flex flex-col items-center justify-center pointer-events-none mt-72">
-        <div className={`flex items-center gap-3 transition-opacity duration-300 ${visible ? "opacity-100" : "opacity-0"}`}>
-          <span style={{ color: stage.color }}>
-            <stage.icon className="h-6 w-6 animate-pulse" />
-          </span>
-          <span className="text-xl font-heading italic text-white drop-shadow-lg">{stage.text}</span>
-        </div>
-        <p className="mt-4 text-sm text-white/50 font-body drop-shadow-md">
-          This typically takes 10–30 seconds. Sit tight.
-        </p>
-      </div>
-    </>
-  );
-};
 
 /* ── Main Component ──────────────────────────────────────────── */
 const AIRoadmap = () => {
@@ -294,7 +251,7 @@ const AIRoadmap = () => {
       )}
 
       {/* Loading State */}
-      {loading && <RoadmapLoadingCard isJDMode={isJDMode} />}
+      {loading && <AILoader text={isJDMode ? "Processing" : "Generating"} className="py-24" />}
 
       {/* Results */}
       {result && !loading && (

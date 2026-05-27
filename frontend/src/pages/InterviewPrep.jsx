@@ -25,65 +25,10 @@ import QuizResult from "../components/QuizResult";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import LoaderScreen from "../components/LoaderScreen";
+import { AILoader } from "../components/ui/ai-loader";
 import "../styles/interviewPrep.css";
 
-const LOADING_STAGES = [
-  "Analyzing career goals and skills...",
-  "Sourcing technical question database...",
-  "Generating custom situational scenarios...",
-  "Validating answers and explanations...",
-  "Finalizing personalized assessment..."
-];
 
-function QuizLoadingCard() {
-  const [stageIdx, setStageIdx] = useState(0);
-  const [fadeState, setFadeState] = useState("stage-visible");
-
-  useEffect(() => {
-    const stageInterval = setInterval(() => {
-      setFadeState("stage-hidden");
-      setTimeout(() => {
-        setStageIdx((prev) => (prev + 1) % LOADING_STAGES.length);
-        setFadeState("stage-visible");
-      }, 400);
-    }, 1800);
-
-    return () => clearInterval(stageInterval);
-  }, []);
-
-  const progressPercent = Math.round(((stageIdx + 1) / LOADING_STAGES.length) * 100);
-
-  return (
-    <div className="ip-loading-card max-w-2xl mx-auto my-12">
-      <div className="ip-loading-glow" />
-      <div className="ip-loading-orb-wrap">
-        <div className="ip-loading-orb">
-          <Sparkles className="h-8 w-8 text-white" />
-        </div>
-      </div>
-      <div className="ip-loading-badge">
-        <Loader2 className="h-3.5 w-3.5" />
-        <span>AI Engine Active</span>
-      </div>
-      <div className="ip-loading-stage-container">
-        <div className={`ip-loading-stage ${fadeState === "stage-visible" ? "ip-stage-visible" : "ip-stage-hidden"}`}>
-          {LOADING_STAGES[stageIdx]}
-        </div>
-      </div>
-      <div className="ip-loading-progress-container">
-        <div className="ip-loading-progress-bar">
-          <div className="ip-loading-progress-fill" style={{ width: `${progressPercent}%` }} />
-        </div>
-        <div className="ip-loading-progress-text">
-          Phase {stageIdx + 1} of {LOADING_STAGES.length}
-        </div>
-      </div>
-      <p className="ip-loading-hint">
-        Sourcing and generating custom technical questions based on your career profile.
-      </p>
-    </div>
-  );
-}
 
 /* ─── Animated circular progress ring ─── */
 function ScoreRing({ score, size = 160, strokeWidth = 8 }) {
@@ -336,8 +281,8 @@ export default function InterviewPrep() {
 
   if (loading) {
     return (
-      <div className="container mx-auto py-12">
-        <QuizLoadingCard />
+      <div className="container mx-auto py-24">
+        <AILoader text="Analyzing" />
       </div>
     );
   }

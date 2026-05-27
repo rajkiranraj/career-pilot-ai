@@ -84,7 +84,15 @@ api.interceptors.response.use(
   (response) => response.data,
   (error) => {
     if (error.response?.status === 401) {
-      window.location.href = '/login';
+      // Prevent infinite reload loop: don't redirect if the failing request is the auth check itself,
+      // or if we're already on the login page.
+      if (
+        error.config && 
+        !error.config.url.includes('/user/me') && 
+        window.location.pathname !== '/login'
+      ) {
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error.response?.data || error.message);
   },

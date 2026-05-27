@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { analyzeATS } from "../services/ATSAnalyzerService";
 import { Button } from "../components/ui/button";
-import { LoadingBreadcrumb } from "../components/ui/animated-loading-svg-text-shimmer";
+import { AILoader } from "../components/ui/ai-loader";
 import { extractTextFromFile } from "../utils/fileParser";
 import "../styles/atsAnalyzer.css";
 
@@ -517,7 +517,7 @@ const ATSAnalyzer = () => {
         >
           {loading ? (
             <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <LoadingBreadcrumb text="Analyzing" className="text-sm" white />
+              <AILoader text="Analyzing" size="sm" />
             </span>
           ) : (
             <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
